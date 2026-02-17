@@ -17,7 +17,7 @@ name, height(in cm) and age_d."""
 
 class Flower(Plant):
     """Class to Manage Flowing Plants Derived from the Plant Class.
-Has name, height(in cm), age_d and collor as inbuilt variables."""
+Has name, height(in cm), age_d and color as inbuilt variables."""
     color: str
 
     def __init__(self,
@@ -27,7 +27,7 @@ Has name, height(in cm), age_d and collor as inbuilt variables."""
                  color: str
                  ) -> None:
         """Flower Class Initialisation function. Takes and sets
-name, height(in cm), age_d and collor. Prints when finnished."""
+name, height(in cm), age_d and color. Prints when finnished."""
 
         super().__init__(name, height, age_d)
         self.color = color
