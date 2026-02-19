@@ -87,7 +87,7 @@ Prints when finnished."""
               f"days,{harvest_season} harvest")
 
 
-def ft_plant_types():
+def ft_plant_types() -> None:
     """Introduction to Garden Data Management. Uses difrent Plant Derived
 Classes to create plant profiles. After, Prints the information."""
     print("=== Garden Plant Types ===")

@@ -16,7 +16,7 @@ name, height(in cm) and age_days."""
         print(f"Created: {self.name} ({self.height}cm, {self.age_days} days)")
 
 
-def ft_garden_data():
+def ft_garden_data() -> None:
     """Introduction to Garden Data Management Streamlining. Uses
 the Plant Class to create plant profiles. After, Prints the information."""
     print("=== Plant Factory Output ===")

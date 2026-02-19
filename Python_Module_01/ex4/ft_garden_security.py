@@ -44,7 +44,7 @@ Conteins protection from Negative numbers"""
         return self.age_d
 
 
-def ft_garden_security():
+def ft_garden_security() -> None:
     """Introduction to Garden Data Security. Uses the SecurePlant Class
 to create plant profiles while checking for any miss inputs.
 The Security Functions print status messages allong this process."""

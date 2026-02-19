@@ -8,7 +8,7 @@ variables."""
     age_days: int
 
 
-def ft_garden_data():
+def ft_garden_data() -> None:
     """Introduction to Garden Data Management. Uses the Plant Class to create
 plant profiles. After, Prints the information."""
     print("=== Garden Plant Registry ===")

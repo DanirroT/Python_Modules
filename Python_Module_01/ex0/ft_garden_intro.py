@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-def ft_garden_intro():
+def ft_garden_intro() -> None:
     """Introduction to Garden Management. Creates Variables for a
 plant: name, height and age. After, Prints the information."""
     print("=== Welcome to My Garden ===")

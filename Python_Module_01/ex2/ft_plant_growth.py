@@ -31,7 +31,7 @@ about the Called upon Plant"""
         return f"{self.name}: {self.height}cm, {self.age_days} days old"
 
 
-def ft_plant_growth():
+def ft_plant_growth() -> None:
     """Introduction to Garden Data Manipulation. Uses the Plant Class to create
 a plant profile. After, simulates the plant aging and rowing for a week.
 Also prints some imformation before and after"""
@@ -40,12 +40,12 @@ Also prints some imformation before and after"""
 
     days_loop = 7
 
-    for day in range(0, days_loop):
-        if day == 0:
+    for day in range(1, days_loop + 1):
+        if day == 1:
             print(f"=== Day {day} ===")
             print(plant.get_info())
             height_1st = plant.height
-        if day == days_loop - 1:
+        if day == days_loop:
             print(f"=== Day {day} ===")
             print(plant.get_info())
             height_lst = plant.height
@@ -54,13 +54,13 @@ Also prints some imformation before and after"""
     delta_height = height_lst - height_1st
 
     if delta_height == 0:
-        delta_height = "None"
+        delta_height_str = "None"
     elif delta_height > 0:
-        delta_height = "+" + str(delta_height) + "cm"
+        delta_height_str = "+" + str(delta_height) + "cm"
     elif delta_height < 0:
-        delta_height = str(delta_height) + "cm"
+        delta_height_str = str(delta_height) + "cm"
 
-    print("Growth this week:", delta_height)
+    print("Growth this week:", delta_height_str)
 
 
 if __name__ == "__main__":
