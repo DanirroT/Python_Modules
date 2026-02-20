@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
 class GardenError(Exception):
+    prefix: str = "Caught a garden error: "
+
     def __init__(self, message) -> None:
-        self.message: str = "Caught a garden error: " + message
+        super().__init__(self.prefix + message)
 
 
 class PlantError(GardenError):
-    def __init__(self, message) -> None:
-        self.message: str = "Caught PlantError: " + message
+    prefix: str = "Caught PlantError: "
 
 
 class WaterError(GardenError):
-    def __init__(self, message) -> None:
-        self.message: str = "Caught WaterError: " + message
+    prefix: str = "Caught WaterError: "
 
 
 def check_age(age: int) -> None:

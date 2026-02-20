@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 def check_temperature(temp_str: str) -> int:
-    """Checks if the String given is numeric and reasonable (0 < T < 40)."""
+    """Checks if the String given (Temprature) is numeric and reasonable (0 < T < 40)."""
     print("input:", temp_str)
     try:
         out_int: int = int(temp_str)
