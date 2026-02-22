@@ -75,7 +75,8 @@ class AdvancedDataHelper:
         return scores
 
     def generate_coordinate_clusters(
-            self, clusters: int = 3, points_per_cluster: int = 10) -> List[Tuple[float, float]]:
+            self, clusters: int = 3, points_per_cluster: int = 10
+            ) -> List[Tuple[float, float]]:
         """Generate clustered coordinate data for advanced testing."""
         coordinates = []
 

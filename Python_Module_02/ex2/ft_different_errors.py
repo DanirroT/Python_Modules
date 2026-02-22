@@ -4,7 +4,8 @@ class GardenError(Exception):
     prefix: str = "Caught a garden error: "
 
     def __init__(self, message) -> None:
-        super().__init__(self.prefix + message)
+        # super().__init__(self.prefix + message)
+        super().__init__(message)
 
 
 class PlantError(GardenError):
@@ -39,25 +40,30 @@ print("=== Custom Garden Errors Demo ===")
 print()
 print("Testing PlantError...")
 try:
-    check_water(4)
-except WaterError as e:
-    print(e)
+    check_age(100)
+except PlantError as e:
+    print("Caught PlantError:", e)
+    # print(e)
+    
 print()
 print("Testing WaterError...")
 try:
-    check_age(100)
-except PlantError as e:
-    print(e)
+    check_water(4)
+except WaterError as e:
+    print("Caught WaterError:", e)
+    # print(e)
 print()
 print("Testing catching all garden errors...")
 try:
     check_age(100)
 except GardenError as e:
-    print(e)
+    print("Caught a garden error:", e)
+    # print(e)
 try:
-    check_water(100)
+    check_water(4)
 except GardenError as e:
-    print(e)
+    print("Caught a garden error:", e)
+    # print(e)
 print()
 print("All custom error types work correctly!")
 
