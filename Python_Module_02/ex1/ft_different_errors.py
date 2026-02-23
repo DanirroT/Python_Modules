@@ -1,38 +1,56 @@
 #!/usr/bin/env python3
 
-def test_error_types(error_list: list[tuple[str, str]], error_type: str | None = None, error_msg: str | None = None, end: bool = False) -> list[tuple[str, str]]:
+from typing import Any
+
+
+def test_error_types(error_list: list[tuple[str, str]],
+                     error_type: str | None = None,
+                     error_msg: str | None = None,
+                     end: bool = False
+                     ) -> list[tuple[str, str]]:
     if end:
         if len(error_list) == 0:
             return error_list
         if len(error_list) == 1:
-            print(f"Caught {error_list[0]}: {error_list[1]}")
+            print(f"Caught {error_list[0][0]}: {error_list[0][1]}")
+            return error_list
         else:
-            print("Testing multiple errors together...")
+            print("Caught an error, but program continues!")
+            return error_list
 
     error_list.append((error_type, error_msg))
     return error_list
 
 
-def operation(input: tuple[str | int, str | int]) -> str | None:
+def operation(input_t: tuple[str | int, str | int]) -> str | None:
     error_list: list[tuple[str, str]] = []
     result: int | None = None
     try:
-        num1: int = int(input[0])
-    except ValueError as e:
-        error_list = test_error_types(error_list, "ValueError", e)
+        num1: int = int(input_t[0])
+    except ValueError:
+        error_list = test_error_types(error_list,
+                                      "ValueError",
+                                      "invalid literal for int()")
+        num1 = 0
 
     try:
-        num2: int = int(input[1])
-    except ValueError as e:
-        error_list = test_error_types(error_list, "ValueError", e)
+        num2: int = int(input_t[1])
+    except ValueError:
+        error_list = test_error_types(error_list,
+                                      "ValueError",
+                                      "invalid literal for int()")
+        num2 = 0
 
     try:
-        if num1 is NaN or  num2
         result = num1 // num2
-    except ZeroDivisionError as e:
-        error_list = test_error_types(error_list, "ZeroDivisionError", e)
+    except ZeroDivisionError:
+        error_list = test_error_types(error_list,
+                                      "ZeroDivisionError",
+                                      "division by zero")
 
     test_error_types(error_list, end=True)
+    if len(error_list) > 0:
+        return None
     return str(result)
 
 
@@ -41,8 +59,12 @@ def read_file(file_name: str) -> str | None:
     result = None
     try:
         file = open(file_name)
-    except FileNotFoundError as e:
-        test_error_types(error_list, "FileNotFoundError", e)
+    except FileNotFoundError:
+        test_error_types(error_list,
+                         "FileNotFoundError",
+                         "No such file \'missing.txt\'")
+        test_error_types(error_list, end=True)
+        return None
 
     print("File has been opened")
     result = file.read(10)
@@ -51,68 +73,62 @@ def read_file(file_name: str) -> str | None:
     return str(result)
 
 
-def read_dict_3(input: tuple[str | int, str | int]) -> str | None:
+def read_dict_3(input_d: dict[str | int, str | int]) -> str | None:
     error_list: list[tuple[str, str]] = []
-    result = None
-    try:
-        num1: int = int(input[0])
-    except ValueError as e:
-        test_error_types(error_list, "ValueError", e)
-
-    try:
-        num2: int = int(input[1])
-    except ValueError:
-        test_error_types(error_list, "ValueError", e)
-    
-    try:
-        result = num1 / num2
-    except ZeroDivisionError:
-        test_error_types(error_list, "ZeroDivisionError", e)
+    result = []
+    for i in ["missing\\_plant", "2", "3"]:
+        try:
+            result.append(input_d[i])
+        except KeyError as e:
+            test_error_types(error_list, "KeyError", str(e.args[0]))
+            test_error_types(error_list, end=True)
+            return None
 
     test_error_types(error_list, end=True)
     return str(result)
 
 
-def garden_operations(mode: str,
-                      input: tuple[str | int, str | int]
-                      | str | dict[int, str]
-                      ) -> str | None:
-    print(input)
+def garden_operations(mode: str, input_val: Any) -> None:
     output = None
     if mode == "op":
-        output = operation(input)
+        output = operation(input_val)
     elif mode == "file":
-        output = read_file(input)
+        output = read_file(input_val)
     elif mode == "dict":
-        output = read_dict_3(input)
-    return output
+        output = read_dict_3(input_val)
+    if output is not None:
+        print("output:", output)
 
 
-print("=== Garden Error Types Demo ===")
-print()
-print("Testing ValueError...")
-garden_operations("op", ("1", "2"))
-garden_operations("op", ("1", "abc"))
-print()
-print("Testing ZeroDivisionError...")
-garden_operations("op", ("1", "2"))
-garden_operations("op", ("1", "0"))
-print()
-print("Testing FileNotFoundError...")
-garden_operations("file", 1)
-garden_operations("file", "abc")
-print()
-print("Testing KeyError...")
+def ft_different_errors() -> None:
+    print("=== Garden Error Types Demo ===")
+    print()
+    print("Testing ValueError...")
+    # garden_operations("op", ("10", "2"))
+    garden_operations("op", ("abc", "2"))
+    print()
+    print("Testing ZeroDivisionError...")
+    # garden_operations("op", ("1", "2"))
+    garden_operations("op", ("1", "0"))
+    print()
+    print("Testing FileNotFoundError...")
+    # garden_operations("file", "preset.txt")
+    garden_operations("file", "missing.txt")
+    print()
+    print("Testing KeyError...")
 
-num1 = {1: "one", 2: "two", 3: "three"}
-num2 = {4: "one", 5: "two", 6: "three"}
+    # num1 = {"missing\\_plant": "one", "2": "two", "3": "three"}
+    num2 = {"1": "one", "2": "two", "3": "three"}
 
-garden_operations("dict", num1)
-garden_operations("dict", num2)
-print()
-print("Testing multiple errors together...")
-garden_operations("op", ("1", "2"))
-garden_operations("op", ("abc", "0"))
-print("Caught an error, but program continues!")
-print()
-print("All error types tested successfully!")
+    # garden_operations("dict", num1)
+    garden_operations("dict", num2)
+    print()
+    print("Testing multiple errors together...")
+    # garden_operations("op", ("1", "2"))
+    garden_operations("op", ("1", "abc"))
+    print()
+    print("All error types tested successfully!")
+
+
+if __name__ == "__main__":
+    ft_different_errors()

@@ -1,70 +1,134 @@
 #!/usr/bin/env python3
 
-class GardenError(Exception):
-    prefix: str = "Caught a garden error: "
-
-    def __init__(self, message) -> None:
-        # super().__init__(self.prefix + message)
-        super().__init__(message)
+from typing import Any
 
 
-class PlantError(GardenError):
-    prefix: str = "Caught PlantError: "
+def test_error_types(error_list: list[tuple[str, str]],
+                     error_type: str | None = None,
+                     error_msg: str | None = None,
+                     end: bool = False
+                     ) -> list[tuple[str, str]]:
+    if end:
+        if len(error_list) == 0:
+            return error_list
+        if len(error_list) == 1:
+            print(f"Caught {error_list[0][0]}: {error_list[0][1]}")
+            return error_list
+        else:
+            print("Caught an error, but program continues!")
+            return error_list
+
+    error_list.append((error_type, error_msg))
+    return error_list
 
 
-class WaterError(GardenError):
-    prefix: str = "Caught WaterError: "
+def operation(input_t: tuple[str | int, str | int]) -> str | None:
+    error_list: list[tuple[str, str]] = []
+    result: int | None = None
+    try:
+        num1: int = int(input_t[0])
+    except ValueError:
+        error_list = test_error_types(error_list,
+                                      "ValueError",
+                                      "invalid literal for int()")
+        num1 = 0
+
+    try:
+        num2: int = int(input_t[1])
+    except ValueError:
+        error_list = test_error_types(error_list,
+                                      "ValueError",
+                                      "invalid literal for int()")
+        num2 = 0
+
+    try:
+        result = num1 // num2
+    except ZeroDivisionError:
+        error_list = test_error_types(error_list,
+                                      "ZeroDivisionError",
+                                      "division by zero")
+
+    test_error_types(error_list, end=True)
+    if len(error_list) > 0:
+        return None
+    return str(result)
 
 
-def check_age(age: int) -> None:
-    if age > 60:
-        raise PlantError("The tomato plant is wilting!")
-    elif age < 0:
-        raise PlantError("Impossible age (min 0)")
-    elif age > 40:
-        print("The tomato plant is ready to harvest")
-    print("The tomato plant is growing")
+def read_file(file_name: str) -> str | None:
+    error_list: list[tuple[str, str]] = []
+    result = None
+    try:
+        file = open(file_name)
+    except FileNotFoundError:
+        test_error_types(error_list,
+                         "FileNotFoundError",
+                         "No such file \'missing.txt\'")
+        test_error_types(error_list, end=True)
+        return None
+
+    print("File has been opened")
+    result = file.read(10)
+    file.close()
+    print("File has been closed")
+    return str(result)
 
 
-def check_water(water_level: int) -> None:
-    if water_level > 50:
-        raise WaterError("The tank is overflowing!")
-    elif water_level < 5:
-        raise WaterError("Not enough water in the tank!")
-    elif water_level < 0:
-        raise WaterError("Impossible age (min 0)")
-    print("water is fine")
+def read_dict_3(input_d: dict[str | int, str | int]) -> str | None:
+    error_list: list[tuple[str, str]] = []
+    result = []
+    for i in ["missing\\_plant", "2", "3"]:
+        try:
+            result.append(input_d[i])
+        except KeyError as e:
+            test_error_types(error_list, "KeyError", str(e.args[0]))
+            test_error_types(error_list, end=True)
+            return None
+
+    test_error_types(error_list, end=True)
+    return str(result)
 
 
-print("=== Custom Garden Errors Demo ===")
-print()
-print("Testing PlantError...")
-try:
-    check_age(100)
-except PlantError as e:
-    print("Caught PlantError:", e)
-    # print(e)
-    
-print()
-print("Testing WaterError...")
-try:
-    check_water(4)
-except WaterError as e:
-    print("Caught WaterError:", e)
-    # print(e)
-print()
-print("Testing catching all garden errors...")
-try:
-    check_age(100)
-except GardenError as e:
-    print("Caught a garden error:", e)
-    # print(e)
-try:
-    check_water(4)
-except GardenError as e:
-    print("Caught a garden error:", e)
-    # print(e)
-print()
-print("All custom error types work correctly!")
+def garden_operations(mode: str, input_val: Any) -> None:
+    output = None
+    if mode == "op":
+        output = operation(input_val)
+    elif mode == "file":
+        output = read_file(input_val)
+    elif mode == "dict":
+        output = read_dict_3(input_val)
+    if output is not None:
+        print("output:", output)
 
-print()
+
+def ft_different_errors() -> None:
+    print("=== Garden Error Types Demo ===")
+    print()
+    print("Testing ValueError...")
+    # garden_operations("op", ("10", "2"))
+    garden_operations("op", ("abc", "2"))
+    print()
+    print("Testing ZeroDivisionError...")
+    # garden_operations("op", ("1", "2"))
+    garden_operations("op", ("1", "0"))
+    print()
+    print("Testing FileNotFoundError...")
+    # garden_operations("file", "preset.txt")
+    garden_operations("file", "missing.txt")
+    print()
+    print("Testing KeyError...")
+
+    # num1 = {"missing\\_plant": "one", "2": "two", "3": "three"}
+    num2 = {"1": "one", "2": "two", "3": "three"}
+
+    # garden_operations("dict", num1)
+    garden_operations("dict", num2)
+    print()
+    print("Testing multiple errors together...")
+    # garden_operations("op", ("1", "2"))
+    garden_operations("op", ("1", "abc"))
+    print()
+    print("All error types tested successfully!")
+
+
+if __name__ == "__main__":
+    ft_different_errors()

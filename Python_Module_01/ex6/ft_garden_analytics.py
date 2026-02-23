@@ -111,14 +111,15 @@ name, height(in cm) and age_d."""
 
 class GardenStats():
 
-    def create_garden_network(self, gardens: list[GardenManager] = []) -> None:
-        self.gardens = []
-        self.garden_count = 0
+    @staticmethod
+    def create_garden_network(gardens_in: list[GardenManager] = []
+                              ) -> list[GardenManager]:
+        gardens_out = []
 
-        if gardens:
-            for garden in gardens:
-                self.garden_count += 1
-                (self.gardens).append(garden)
+        if gardens_in:
+            for garden in gardens_in:
+                gardens_out.append(garden)
+        return gardens_out
 
     @staticmethod
     def report(garden: GardenManager) -> None:
@@ -153,9 +154,11 @@ class GardenStats():
             return False
         return True
 
-    def judge(self, gardens: list[GardenManager]) -> None:
+    def judge(self, gardens_in: list[GardenManager]) -> None:
 
         problems: list[tuple[str, str]] = []
+
+        gardens = self.create_garden_network(gardens_in)
 
         for garden in gardens:
             for plant in garden.plants:

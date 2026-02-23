@@ -5,3 +5,5 @@ source .venv/bin/activate
 pip install flake8
 alias norminette=flake8
 alias python=python3
+
+# python3 -m flake8 .

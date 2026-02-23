@@ -20,6 +20,7 @@ def garden_operations(operation: str) -> None:
         data: dict = {}
         data["missing_plant"]
 
+
 def test_error_types() -> None:
     """Test and catch different error types."""
     print("Testing ValueError...")
@@ -49,7 +50,7 @@ def test_error_types() -> None:
     print("Testing multiple errors together...")
     try:
         garden_operations("")
-    except (ValueError, ZeroDivisionError, FileNotFoundError, KeyError) as e:
+    except (ValueError, ZeroDivisionError, FileNotFoundError, KeyError):
         print("Caught an error, but program continues!\n")
 
     print("All error types tested successfully!")

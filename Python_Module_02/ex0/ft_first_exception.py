@@ -18,20 +18,24 @@ def check_temperature(temp_str: str) -> int:
     return out_int
 
 
-print("outout:", check_temperature("12"))
-print()
-print("outout:", check_temperature("0"))
-print()
-print("outout:", check_temperature("40"))
-print()
-print("outout:", check_temperature("123"))
-print()
-print("outout:", check_temperature("-1"))
-print()
-print("outout:", check_temperature("twelve"))
-print()
+def test_temperature_input() -> None:
+    """Run temperature validation tests."""
 
-try:
-    raise ValueError()
-except ValueError as e:
-    print(e)
+    print("=== Garden Temperature Checker ===\n")
+
+    inputs: list[str] = ["25", "0", "abc", "100", "-50"]
+
+    for input in inputs:
+        print(f"Testing temperature: {input}")
+        try:
+            check_temperature(input)
+            print(f"Temperature {input}°C is perfect for plants!\n")
+        except ValueError as e:
+            print(e)
+
+    print("All tests completed - program didn't crash!")
+
+
+if __name__ == "__main__":
+
+    test_temperature_input()
