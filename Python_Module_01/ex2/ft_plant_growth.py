@@ -35,7 +35,6 @@ def ft_plant_growth() -> None:
     """Introduction to Garden Data Manipulation. Uses the Plant Class to create
 a plant profile. After, simulates the plant aging and rowing for a week.
 Also prints some imformation before and after"""
-    print("=== Garden Plant Registry ===")
     plant = Plant("Rose", 25, 30)
 
     days_loop = 7

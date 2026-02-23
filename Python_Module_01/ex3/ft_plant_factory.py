@@ -16,23 +16,21 @@ name, height(in cm) and age_days."""
         print(f"Created: {self.name} ({self.height}cm, {self.age_days} days)")
 
 
-def ft_garden_data() -> None:
+def ft_plant_factory() -> None:
     """Introduction to Garden Data Management Streamlining. Uses
 the Plant Class to create plant profiles. After, Prints the information."""
     print("=== Plant Factory Output ===")
-    plant_1 = Plant("Rose", 25, 30)
-    _ = plant_1
-    plant_2 = Plant("Oak", 200, 260)
-    _ = plant_2
-    plant_3 = Plant("Cactus", 5, 90)
-    _ = plant_3
-    plant_4 = Plant("Sunflower", 80, 45)
-    _ = plant_4
-    plant_5 = Plant("Fern", 15, 120)
-    _ = plant_5
 
-    print("\nTotal plants created: 5")
+    plants: list[Plant] = []
+
+    plants.append(Plant("Rose", 25, 30))
+    plants.append(Plant("Oak", 200, 260))
+    plants.append(Plant("Cactus", 5, 90))
+    plants.append(Plant("Sunflower", 80, 45))
+    plants.append(Plant("Fern", 15, 120))
+
+    print(f"\nTotal plants created: {len(plants)}")
 
 
 if __name__ == "__main__":
-    ft_garden_data()
+    ft_plant_factory()

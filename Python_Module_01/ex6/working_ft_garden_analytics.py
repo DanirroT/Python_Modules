@@ -72,7 +72,7 @@ variables."""
         return cls.__name__
 
 
-class GardenManager():
+class Garden():
     name: str
     owner: str
     plants: list[Plant]
@@ -108,26 +108,13 @@ name, height(in cm) and age_d."""
             self.plant_growth += 1
             plant.height += 1
 
-
-class GardenStats():
-
-    def create_garden_network(self, gardens: list[GardenManager] = []) -> None:
-        self.gardens = []
-        self.garden_count = 0
-
-        if gardens:
-            for garden in gardens:
-                self.garden_count += 1
-                (self.gardens).append(garden)
-
-    @staticmethod
-    def report(garden: GardenManager) -> None:
+    def report(self) -> None:
         regular = 0
         flower = 0
         prized = 0
-        print(f"=== {garden.owner}'s Garden Report ===")
+        print(f"=== {self.owner}'s Garden Report ===")
         print("Plants in garden:")
-        for plant in garden.plants:
+        for plant in self.plants:
             plant_type = plant.get_plant_type()
             if plant_type == "PrizeFlower":
                 prized += 1
@@ -142,42 +129,44 @@ class GardenStats():
                 regular += 1
                 print(f"- {plant.name}: {plant.height}cm")
         print()
-        print(f"Plants added: {garden.plants_added},",
-              f"Total growth: {garden.plant_growth}cm")
+        print(f"Plants added: {self.plants_added},",
+              f"Total growth: {self.plant_growth}cm")
         print(f"Plant types: {regular} regular, {flower}",
               f"flowering, {prized} prize flowers")
 
-    @staticmethod
-    def validate_height(plant: Plant) -> bool:
-        if plant.height < 0:
-            return False
-        return True
 
-    def judge(self, gardens: list[GardenManager]) -> None:
+class GardenManager():
+    gardens: list[Garden]
+    garden_count: int
 
+    def __init__(self, gardens: list[Garden] = []) -> None:
+        self.gardens = []
+        self.garden_count = 0
+
+        if gardens:
+            for garden in gardens:
+                self.garden_count += 1
+                (self.gardens).append(garden)
+
+    def validate_height(self) -> bool:
         problems: list[tuple[str, str]] = []
-
-        for garden in gardens:
+        for garden in self.gardens:
             for plant in garden.plants:
-                height_val = self.validate_height(plant)
-                if not height_val:
+                if plant.height < 0:
                     problems.append((garden.name, plant.name))
+        if problems == []:
+            return True
+        print("Found problems at:", ", ".join(f"{g} {p}" for g, p in problems))
+        return False
 
-        height_val = True
-        if problems:
-            print("Found problems at:", ", ".join(f"{p} in {g}"
-                                                  for g, p in problems))
-            height_val = False
-
+    def judge(self) -> None:
+        height_val = self.validate_height()
         print(f"Height validation test: {height_val}")
         if not height_val:
             return
-
-        print("Garden scores - ", end="")
-        garden_count = 0
         start = True
-        for garden in gardens:
-            garden_count += 1
+        print("Garden scores - ", end="")
+        for garden in self.gardens:
             if start:
                 start = False
             else:
@@ -192,7 +181,7 @@ class GardenStats():
                 score += plant.height
             print(score, end="")
         print()
-        print(f"Total gardens managed: {garden_count}")
+        print(f"Total gardens managed: {self.garden_count}")
 
 
 def ft_garden_analytics() -> None:
@@ -202,7 +191,7 @@ garden manager after it prints a status screen with relevant information."""
 
     print("=== Garden Management System Demo ===")
 
-    garden = GardenManager("Big Garden", "Alice")
+    garden = Garden("Big Garden", "Alice")
 
     print()
     garden.add_plant(Plant("Oak tree", 100, 1825))
@@ -212,14 +201,13 @@ garden manager after it prints a status screen with relevant information."""
     print()
     garden.grow()
     print()
-    garden_stats = GardenStats()
-
-    garden_stats.report(garden)
+    garden.report()
     print()
-    garden_2 = GardenManager("Small Garden", "Ben",
-                             [Plant("Jacaranda", 82, 150)])
+    garden_manager = GardenManager([garden,
+                                    Garden("Small Garden", "Ben",
+                                           [Plant("Jacaranda", 82, 150)])])
 
-    garden_stats.judge([garden, garden_2])
+    garden_manager.judge()
 
 
 if __name__ == "__main__":
