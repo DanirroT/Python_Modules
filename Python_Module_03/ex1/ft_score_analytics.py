@@ -2,12 +2,14 @@
 
 import sys
 
+
 def ft_score_analytics(scores_str: list[str]) -> None:
     print("=== Player Score Analytics ===")
     count: int = len(scores_str)
-    
+
     if count == 0:
-        print("No scores provided. Usage: python3 ft_score_analytics.py <score1> <score2> ...")
+        print("No scores provided."
+              "Usage: python3 ft_score_analytics.py <score1> <score2> ...")
         return
     scores: list[int] = []
     for score in scores_str:
@@ -24,7 +26,6 @@ def ft_score_analytics(scores_str: list[str]) -> None:
     print("High score:", high_score)
     print("Low score:", low_score)
     print("Score range:", score_range)
-   
 
 
 if __name__ == "__main__":

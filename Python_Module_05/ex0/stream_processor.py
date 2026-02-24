@@ -11,14 +11,14 @@ class DataProcessor(ABC):
     processed_mesg = "Processed data: "
 
     @abstractmethod
-    def process(self, data: Any) -> str:
+    def process(self, data: Any, to_print: bool) -> str:
         print(f"Processing data: {data}")
-        if not self.validate(data):
+        if not self.validate(data, to_print):
             return self.invalid_data_mesg + self.__class__.__name__
         return self.format_output(data)
 
     @abstractmethod
-    def validate(self, data: Any) -> bool:
+    def validate(self, data: Any, to_print: bool) -> bool:
         if len(data) > 1:
             for item in data:
                 try:
@@ -26,7 +26,8 @@ class DataProcessor(ABC):
                 except ValueError:
                     return False
         del buffer
-        print(self.validation_mesg, "Numeric data verified")
+        if to_print:
+            print(self.validation_mesg, "Numeric data verified")
         return True
 
     def format_output(self, result: str) -> str:
@@ -36,8 +37,8 @@ class DataProcessor(ABC):
 class NumericProcessor(DataProcessor):
     processed_mesg = "Processed "
 
-    def process(self, data: Any) -> str:
-        if not self.validate(data):
+    def process(self, data: Any, to_print: bool) -> str:
+        if not self.validate(data, to_print):
             return self.invalid_data_mesg + self.__class__.__name__
         i_len = len(data)
         i_sum = sum(data)
@@ -45,7 +46,7 @@ class NumericProcessor(DataProcessor):
         return self.format_output(f"{i_len} numeric values, " +
                                   f"sum={i_sum}, avg={i_avg:.1f}")
 
-    def validate(self, data: Any) -> bool:
+    def validate(self, data: Any, to_print: bool) -> bool:
         if len(data) > 1:
             for item in data:
                 try:
@@ -53,7 +54,8 @@ class NumericProcessor(DataProcessor):
                 except ValueError:
                     return False
         del buffer
-        print(self.validation_mesg, "Numeric data verified")
+        if to_print:
+            print(self.validation_mesg, "Numeric data verified")
         return True
 
     def format_output(self, result: str) -> str:
@@ -63,20 +65,21 @@ class NumericProcessor(DataProcessor):
 class TextProcessor(DataProcessor):
     processed_mesg = "Processed text: "
 
-    def process(self, data: Any) -> str:
-        if not self.validate(data):
+    def process(self, data: Any, to_print: bool) -> str:
+        if not self.validate(data, to_print):
             return self.invalid_data_mesg + self.__class__.__name__
         s_len = len(data)
         word_count = len(data.strip().split())
         return self.format_output(f"{s_len} characters, {word_count} words")
 
-    def validate(self, data: Any) -> bool:
+    def validate(self, data: Any, to_print: bool) -> bool:
         try:
             buffer = str(data)
         except ValueError:
             return False
         del buffer
-        print(self.validation_mesg, "Text data verified")
+        if to_print:
+            print(self.validation_mesg, "Text data verified")
         return True
 
     def format_output(self, result: str) -> str:
@@ -86,8 +89,8 @@ class TextProcessor(DataProcessor):
 class LogProcessor(DataProcessor):
     log_type = ""
 
-    def process(self, data: Any) -> str:
-        if not self.validate(data):
+    def process(self, data: Any, to_print: bool) -> str:
+        if not self.validate(data, to_print):
             return self.invalid_data_mesg + self.__class__.__name__
         if data.startswith("ERROR") or data.startswith("ALERT"):
             self.log_type = "[ALERT]"
@@ -99,7 +102,7 @@ class LogProcessor(DataProcessor):
             self.log_type = "[UNKNOWN]"
         return self.format_output(data)
 
-    def validate(self, data: Any) -> bool:
+    def validate(self, data: Any, to_print: bool) -> bool:
         try:
             buffer = str(data)
         except ValueError:
@@ -108,7 +111,8 @@ class LogProcessor(DataProcessor):
                 or data.startswith("DEBUG") or data.startswith("ALERT")):
             print("Invalid data for LogProcessor")
         del buffer
-        print(self.validation_mesg, "Log entry verified")
+        if to_print:
+            print(self.validation_mesg, "Log entry verified")
         return True
 
     def format_output(self, result: str) -> str:
@@ -148,23 +152,28 @@ def stream_processor():
     print()
     numeric_data = [1, 2, 3, 4, 5]
     print(f"Processing data: {numeric_data}")
-    print("Output:", num_p.process(numeric_data))
+    print("Output:", num_p.process(numeric_data, True))
     print()
     text_data = "Hello Nexus World"
     print(f"Processing data: {text_data}")
-    print("Output:", txt_p.process(text_data))
+    print("Output:", txt_p.process(text_data, True))
     print()
     log_data = "ERROR: Connection timeout"
     print(f"Processing data: {log_data}")
-    print("Output:", log_p.process(log_data))
+    print("Output:", log_p.process(log_data, True))
     print()
 
     print("=== Polymorphic Processing Demo ===")
 
     print("Processing multiple data types through same interface...")
-    print("Result 1:", num_p.process([1, 2, 3]))
-    print("Result 2:", txt_p.process("Hello World!"))
-    print("Result 3:", log_p.process("INFO level detected: System ready"))
+    print("Result 1:", num_p.process([1, 2, 3], False))
+    print("Result 2:", txt_p.process("Hello World!", False))
+    print("Result 3:", log_p.process("INFO level detected: System ready",
+                                     False))
+
+    print()
+
+    print("Foundation systems online. Nexus ready for advanced streams.")
 
 
 if __name__ == "__main__":

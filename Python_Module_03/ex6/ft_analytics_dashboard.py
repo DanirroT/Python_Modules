@@ -63,6 +63,85 @@ class Player():
             self.achivements.add("berserker")
 
 
+def list_comprehension(player_list: list[Player]) -> None:
+
+    print("=== List Comprehension Examples ===")
+
+    scores = {player.name: player.score for player in player_list}
+
+    high_scorers = [player for player, score in scores.items() if score > 2000]
+    doubled_scores = [score * 2 for score in scores.values()]
+    active_players = [player.name for player in player_list if player.active]
+
+    print("High scorers (>2000):", high_scorers)
+    print("Scores doubled:", doubled_scores)
+    print("Active players:", active_players)
+
+
+def dict_comprehension(player_list: list[Player]) -> None:
+
+    print("=== Dict Comprehension Examples ===")
+
+    scores_active = {player.name: player.score
+                     for player in player_list
+                     if player.active}
+
+    achievement_count_active = {player.name: len(player.achivements)
+                                for player in player_list
+                                if player.active}
+
+    print("Player scores:", scores_active)
+    print("Score categories:", {'high': 3, 'medium': 2, 'low': 1})
+    print("Achievement counts:", achievement_count_active)
+
+
+def set_comprehension(player_list: list[Player]) -> None:
+
+    print("=== Set Comprehension Examples ===")
+
+    scores = {player.name: player.score for player in player_list}
+
+    # achievement_list = {player.name: player.achivements
+    #                     for player in player_list}
+
+    achievements_present = set()
+    for player in player_list:
+        achievements_present.update(player.achivements)
+
+    rare_achievements = {achievement
+                         for achievement in achievements_present
+                         if sum(achievement in player.achivements
+                                for player in player_list)
+                         == 1}
+    active_locations = {player.location
+                        for player in player_list
+                        if player.active}
+
+    print("Unique players:", set(scores.keys()))
+    print("Unique achievements:", rare_achievements)
+    print("Active regions:", active_locations)
+
+
+def combined_analysis(player_list: list[Player]) -> None:
+
+    print("=== Combined Analysis ===")
+
+    scores = {player.name: player.score for player in player_list}
+
+    achievement_count = {player.name: len(player.achivements)
+                         for player in player_list}
+
+    players_count: int = len(scores)
+    print("Total players:", players_count)
+    print("Total unique achievements:", 12)
+    average_score: float = sum(scores.values()) / players_count
+    print(f"Average score: {average_score:.1f}")
+    top_performer = max(scores, key=scores.get)
+    print("Top performer: ", top_performer,
+          " (", scores[top_performer], " points, ",
+          achievement_count[top_performer], " achievements)", sep="")
+
+
 def ft_analytics_dashboard():
     print("=== Game Analytics Dashboard ===")
     print()
@@ -82,59 +161,19 @@ def ft_analytics_dashboard():
 
     player_list = [alice, bob, charlie, diana]
 
-    print("=== List Comprehension Examples ===")
+    list_comprehension(player_list)
 
-    scores = {player.name: player.score for player in player_list}
-    # achievement_list = {player.name: player.achivements
-    #                     for player in player_list}
-    achievement_count = {player.name: len(player.achivements)
-                         for player in player_list}
-    achievement_count_active = {player.name: len(player.achivements)
-                                for player in player_list
-                                if player.active}
-    high_scorers = [player for player, score in scores.items() if score > 2000]
-    doubled_scores = [score * 2 for score in scores.values()]
-    active_players = [player.name for player in player_list if player.active]
-
-    print("High scorers (>2000):", high_scorers)
-    print("Scores doubled:", doubled_scores)
-    print("Active players:", active_players)
     print()
-    print("=== Dict Comprehension Examples ===")
-    scores_active = {player.name: player.score for player in player_list if player.active}
-    print("Player scores:", scores_active)
-    print("Score categories:", {'high': 3, 'medium': 2, 'low': 1})
-    print("Achievement counts:", achievement_count_active)
+
+    dict_comprehension(player_list)
+
     print()
-    print("=== Set Comprehension Examples ===")
 
-    achievements_present = set()
-    for player in player_list:
-        achievements_present.update(player.achivements)
+    set_comprehension(player_list)
 
-    rare_achievements = {achievement
-                         for achievement in achievements_present
-                         if sum(achievement in player.achivements
-                                for player in player_list)
-                         == 1}
-    active_locations = {player.location
-                        for player in player_list
-                        if player.active}
-
-    print("Unique players:", set(scores.keys()))
-    print("Unique achievements:", rare_achievements)
-    print("Active regions:", active_locations)
     print()
-    print("=== Combined Analysis ===")
-    players_count: int = len(scores)
-    print("Total players:", players_count)
-    print("Total unique achievements:", 12)
-    average_score: float = sum(scores.values()) / players_count
-    print(f"Average score: {average_score:.2f}")
-    top_performer = max(scores, key=scores.get)
-    print("Top performer: ", top_performer,
-          " (", scores[top_performer], " points, ",
-          achievement_count[top_performer], " achievements)", sep="")
+
+    combined_analysis(player_list)
 
 
 if __name__ == "__main__":

@@ -219,7 +219,7 @@ garden manager after it prints a status screen with relevant information."""
 
     garden_stats.report(garden)
     print()
-    garden_2 = GardenManager("Small Garden", "Ben",
+    garden_2 = GardenManager("Small Garden", "Bob",
                              [Plant("Jacaranda", 82, 150)])
 
     garden_stats.judge([garden, garden_2])

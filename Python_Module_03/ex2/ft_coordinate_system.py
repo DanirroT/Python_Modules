@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-def ft_calc_distance(statrt: tuple[float, float, float], end: tuple[float, float, float]) -> float:
+def ft_calc_distance(statrt: tuple[float, float, float],
+                     end: tuple[float, float, float]
+                     ) -> float:
     """Calculate the distance between two points in 3D space."""
     if not statrt or not end:
         return None
@@ -9,7 +11,8 @@ def ft_calc_distance(statrt: tuple[float, float, float], end: tuple[float, float
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2) ** 0.5
 
 
-def ft_parse_coordinates(coord_str: str) -> tuple[int, int, int]:
+def ft_parse_coordinates(coord_str: str
+                         ) -> tuple[int, int, int] | None:
     """Parse a string of the format 'x,y,z' into a tuple of integers."""
     try:
         split_coords = coord_str.split(",")
@@ -22,8 +25,7 @@ def ft_parse_coordinates(coord_str: str) -> tuple[int, int, int]:
     except ValueError as e:
         print(f"Error parsing coordinates: {e}")
         print(f"Error details - Type: ValueError, Args: (\"{e}\".)")
-        return ()
-
+        return None
 
 
 def ft_coordinate_system() -> None:
@@ -32,7 +34,8 @@ def ft_coordinate_system() -> None:
     print()
     point_a = (10, 20, 5)
     print(f"Position created: {point_a}")
-    print(f"Distance between {origin} and {point_a}: {ft_calc_distance(origin, point_a):.2f}")
+    print(f"Distance between {origin} and {point_a}:n"
+          f"{ft_calc_distance(origin, point_a):.2f}")
     print()
     point_b_str = "3,4,0"
     print(f"Parsing coordinates: \"{point_b_str}\"")
@@ -52,6 +55,7 @@ def ft_coordinate_system() -> None:
     print(f"Player at x={point_b[0]}, y={point_b[1]}, z={point_b[2]}")
     x, y, z = point_b
     print(f"Coordinates: X={x}, Y={y}, Z={z}")
+
 
 if __name__ == "__main__":
     ft_coordinate_system()
