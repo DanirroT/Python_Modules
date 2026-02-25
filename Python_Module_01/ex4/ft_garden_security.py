@@ -7,7 +7,7 @@ Has and checks name, height(in cm) and age_d as inbuilt variables."""
     _height: int
     _age_days: int
 
-    def __init__(self, name: str, height: int, age_d: int):
+    def __init__(self, name: str, height: int, age_d: int) -> None:
         """Plant Class Initialisation function. Takes and sets
 name, height(in cm) and age_d."""
         print(f"Plant created: {name}")
@@ -15,7 +15,7 @@ name, height(in cm) and age_d."""
         self.set_height(height)
         self.set_age(age_d)
 
-    def set_height(self, height: int):
+    def set_height(self, height: int) -> None:
         """Sets the Heigth Value of the called upon SecurePlant.
 Conteins protection from Negative numbers"""
         if height < 0:
@@ -25,7 +25,7 @@ Conteins protection from Negative numbers"""
             print(f"Height updated: {height}cm [OK]")
             self._height = height
 
-    def set_age(self, age_d: int):
+    def set_age(self, age_d: int) -> None:
         """Sets the Age Value of the called upon SecurePlant.
 Conteins protection from Negative numbers"""
         if age_d < 0:
@@ -35,11 +35,11 @@ Conteins protection from Negative numbers"""
             print(f"Age updated: {age_d} days [OK]")
             self.age_d = age_d
 
-    def get_height(self):
+    def get_height(self) -> int:
         """Safely returns the Heigth Value of the called upon SecurePlant."""
         return self._height
 
-    def get_age(self):
+    def get_age(self) -> int:
         """Safely returns the Age Value of the called upon SecurePlant."""
         return self.age_d
 

@@ -143,7 +143,7 @@ same interface
 """
 
 
-def stream_processor():
+def stream_processor() -> None:
     num_p = NumericProcessor()
     txt_p = TextProcessor()
     log_p = LogProcessor()

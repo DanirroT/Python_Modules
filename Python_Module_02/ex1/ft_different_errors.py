@@ -60,9 +60,9 @@ def read_file(file_name: str) -> str | None:
     try:
         file = open(file_name)
     except FileNotFoundError:
-        test_error_types(error_list,
-                         "FileNotFoundError",
-                         "No such file \'missing.txt\'")
+        error_list = test_error_types(error_list,
+                                      "FileNotFoundError",
+                                      f"No such file \'{file_name}\'")
         test_error_types(error_list, end=True)
         return None
 
@@ -80,7 +80,9 @@ def read_dict_3(input_d: dict[str | int, str | int]) -> str | None:
         try:
             result.append(input_d[i])
         except KeyError as e:
-            test_error_types(error_list, "KeyError", str(e.args[0]))
+            error_list = test_error_types(error_list,
+                                          "KeyError",
+                                          str(e.args[0]))
             test_error_types(error_list, end=True)
             return None
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-def ft_calc_distance(statrt: tuple[float, float, float],
-                     end: tuple[float, float, float]
-                     ) -> float:
+def ft_calc_distance(statrt: tuple[float, float, float] | None,
+                     end: tuple[float, float, float] | None
+                     ) -> float | None:
     """Calculate the distance between two points in 3D space."""
     if not statrt or not end:
         return None
@@ -24,7 +24,7 @@ def ft_parse_coordinates(coord_str: str
         return (x, y, z)
     except ValueError as e:
         print(f"Error parsing coordinates: {e}")
-        print(f"Error details - Type: ValueError, Args: (\"{e}\".)")
+        print(f"Error details - Type: ValueError, Args: {e.args}")
         return None
 
 
@@ -34,7 +34,7 @@ def ft_coordinate_system() -> None:
     print()
     point_a = (10, 20, 5)
     print(f"Position created: {point_a}")
-    print(f"Distance between {origin} and {point_a}:n"
+    print(f"Distance between {origin} and {point_a}:"
           f"{ft_calc_distance(origin, point_a):.2f}")
     print()
     point_b_str = "3,4,0"
@@ -59,3 +59,12 @@ def ft_coordinate_system() -> None:
 
 if __name__ == "__main__":
     ft_coordinate_system()
+
+# [(31, -36, -24),
+# (44, -15, -10),
+# (-22, -33, 22),
+# (-37, 36, 22),
+# (19, -39, 12),
+# (4, -46, -24),
+# (-39, -23, -11),
+# (14, 27, -24)]

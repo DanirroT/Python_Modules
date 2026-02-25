@@ -111,7 +111,7 @@ name, height(in cm) and age_d."""
             print("System recovered and continuing...")
 
 
-def test_plant_checks() -> None:
+def test_garden_management() -> None:
     print("=== Garden Management System ===")
 
     print()
@@ -150,4 +150,4 @@ def test_plant_checks() -> None:
 
 
 if __name__ == "__main__":
-    test_plant_checks()
+    test_garden_management()

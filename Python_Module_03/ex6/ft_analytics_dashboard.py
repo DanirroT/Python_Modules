@@ -142,7 +142,7 @@ def combined_analysis(player_list: list[Player]) -> None:
           achievement_count[top_performer], " achievements)", sep="")
 
 
-def ft_analytics_dashboard():
+def ft_analytics_dashboard() -> None:
     print("=== Game Analytics Dashboard ===")
     print()
     alice = Player("alice", "north", 0, 2300, 6, True)

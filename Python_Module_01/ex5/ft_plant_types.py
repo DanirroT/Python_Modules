@@ -34,7 +34,7 @@ name, height(in cm), age_d and color. Prints when finnished."""
         print(f"\n{self.name} (Flower): {self.height}cm, {self.age_d}",
               f"days, {color} color")
 
-    def bloom(self):
+    def bloom(self) -> None:
         """shows a nice message"""
         print(f"{self.name} is blooming beautifully!")
 
@@ -56,7 +56,7 @@ name, height(in cm), age_d and trunk_diameter. Prints when finnished."""
         print(f"\n{self.name} (Tree): {self.height}cm, {self.age_d}",
               f"days, {trunk_diameter}cm diameter")
 
-    def produce_shade(self):
+    def produce_shade(self) -> None:
         """Calculates and displays the shade given by the called upon Tree"""
         # trunk_area = (((self.trunk_diameter / 2)**2 * 3.14) / 10000)
         shade = int((self.trunk_diameter**2 * 3.14) / 100)

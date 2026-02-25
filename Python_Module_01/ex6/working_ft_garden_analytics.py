@@ -38,7 +38,7 @@ name, height(in cm), age_d, color and blooming. Prints when finnished."""
         self.color = color
         self.blooming = blooming
 
-    def bloom(self):
+    def bloom(self) -> None:
         """shows a nice message"""
         self.blooming = True
         print(f"{self.name} is blooming beautifully!")

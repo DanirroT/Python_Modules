@@ -38,7 +38,7 @@ name, height(in cm), age_d, color and blooming. Prints when finnished."""
         self.color = color
         self.blooming = blooming
 
-    def bloom(self):
+    def bloom(self) -> None:
         """shows a nice message"""
         self.blooming = True
         print(f"{self.name} is blooming beautifully!")
@@ -108,94 +108,94 @@ name, height(in cm) and age_d."""
             self.plant_growth += 1
             plant.height += 1
 
+    class GardenStats():
 
-class GardenStats():
+        @staticmethod
+        def create_garden_network(gardens_in: list["GardenManager"] = []
+                                  ) -> list["GardenManager"]:
+            gardens_out = []
 
-    @staticmethod
-    def create_garden_network(gardens_in: list[GardenManager] = []
-                              ) -> list[GardenManager]:
-        gardens_out = []
+            if gardens_in:
+                for garden in gardens_in:
+                    gardens_out.append(garden)
+            return gardens_out
 
-        if gardens_in:
-            for garden in gardens_in:
-                gardens_out.append(garden)
-        return gardens_out
-
-    @staticmethod
-    def report(garden: GardenManager) -> None:
-        regular = 0
-        flower = 0
-        prized = 0
-        print(f"=== {garden.owner}'s Garden Report ===")
-        print("Plants in garden:")
-        for plant in garden.plants:
-            plant_type = plant.get_plant_type()
-            if plant_type == "PrizeFlower":
-                prized += 1
-                print(f"- {plant.name}: {plant.height}cm, {plant.color} "
-                      "flower" " (blooming)" if plant.blooming else "",
-                      f", Prize points: {plant.prize_points}", sep="")
-            elif plant_type == "FloweringPlant":
-                flower += 1
-                print(f"- {plant.name}: {plant.height}cm, {plant.color} flower"
-                      " (blooming)" if plant.blooming else "")
-            elif plant_type == "Plant":
-                regular += 1
-                print(f"- {plant.name}: {plant.height}cm")
-        print()
-        print(f"Plants added: {garden.plants_added},",
-              f"Total growth: {garden.plant_growth}cm")
-        print(f"Plant types: {regular} regular, {flower}",
-              f"flowering, {prized} prize flowers")
-
-    @staticmethod
-    def validate_height(plant: Plant) -> bool:
-        if plant.height < 0:
-            return False
-        return True
-
-    def judge(self, gardens_in: list[GardenManager]) -> None:
-
-        problems: list[tuple[str, str]] = []
-
-        gardens = self.create_garden_network(gardens_in)
-
-        for garden in gardens:
-            for plant in garden.plants:
-                height_val = self.validate_height(plant)
-                if not height_val:
-                    problems.append((garden.name, plant.name))
-
-        height_val = True
-        if problems:
-            print("Found problems at:", ", ".join(f"{p} in {g}"
-                                                  for g, p in problems))
-            height_val = False
-
-        print(f"Height validation test: {height_val}")
-        if not height_val:
-            return
-
-        print("Garden scores - ", end="")
-        garden_count = 0
-        start = True
-        for garden in gardens:
-            garden_count += 1
-            if start:
-                start = False
-            else:
-                print(", ", end="")
-            score = 0
-            print(garden.owner, end=" ")
+        @staticmethod
+        def report(garden: "GardenManager") -> None:
+            regular = 0
+            flower = 0
+            prized = 0
+            print(f"=== {garden.owner}'s Garden Report ===")
+            print("Plants in garden:")
             for plant in garden.plants:
                 plant_type = plant.get_plant_type()
-                score += 10
                 if plant_type == "PrizeFlower":
-                    score += plant.prize_points
-                score += plant.height
-            print(score, end="")
-        print()
-        print(f"Total gardens managed: {garden_count}")
+                    prized += 1
+                    print(f"- {plant.name}: {plant.height}cm, {plant.color} "
+                          "flower" " (blooming)" if plant.blooming else "",
+                          f", Prize points: {plant.prize_points}", sep="")
+                elif plant_type == "FloweringPlant":
+                    flower += 1
+                    print(f"- {plant.name}: {plant.height}cm, "
+                          f"{plant.color} flower"
+                          " (blooming)" if plant.blooming else "")
+                elif plant_type == "Plant":
+                    regular += 1
+                    print(f"- {plant.name}: {plant.height}cm")
+            print()
+            print(f"Plants added: {garden.plants_added},",
+                  f"Total growth: {garden.plant_growth}cm")
+            print(f"Plant types: {regular} regular, {flower}",
+                  f"flowering, {prized} prize flowers")
+
+        @staticmethod
+        def validate_height(plant: Plant) -> bool:
+            if plant.height < 0:
+                return False
+            return True
+
+        def judge(self, gardens_in: list["GardenManager"]) -> None:
+
+            problems: list[tuple[str, str]] = []
+
+            gardens = self.create_garden_network(gardens_in)
+
+            for garden in gardens:
+                for plant in garden.plants:
+                    height_val = self.validate_height(plant)
+                    if not height_val:
+                        problems.append((garden.name, plant.name))
+
+            height_val = True
+            if problems:
+                print("Found problems at:", ", ".join(f"{p} in {g}"
+                                                      for g, p in problems))
+                height_val = False
+
+            print(f"Height validation test: {height_val}")
+            if not height_val:
+                return
+
+            print("Garden scores - ", end="")
+            garden_count = 0
+            start = True
+            for garden in gardens:
+                garden_count += 1
+                if start:
+                    start = False
+                else:
+                    print(", ", end="")
+                score = 0
+                print(garden.owner, end=" ")
+                for plant in garden.plants:
+                    plant_type = plant.get_plant_type()
+                    score += 10
+                    if plant_type == "PrizeFlower":
+                        score += plant.prize_points
+                    score += plant.height
+                print(score, end="")
+            print()
+            print(f"Total gardens managed: {garden_count}")
 
 
 def ft_garden_analytics() -> None:
@@ -215,7 +215,7 @@ garden manager after it prints a status screen with relevant information."""
     print()
     garden.grow()
     print()
-    garden_stats = GardenStats()
+    garden_stats = GardenManager.GardenStats()
 
     garden_stats.report(garden)
     print()
