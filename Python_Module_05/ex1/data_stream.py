@@ -11,7 +11,8 @@ class DataStream(ABC):
     data_type: str
     data: Any
 
-    def __init__(self, name: str, stream_id: str, data_type: str, data: Any):
+    def __init__(self, name: str, stream_id: str, data_type: str, data: Any
+                 ) -> None:
         self.name = name
         self.stream_id = stream_id
         self.data_type = data_type
@@ -50,9 +51,10 @@ class DataStream(ABC):
         return output_dict
 
 
-class StreamProcessor(DataStream):
+class SensorStream(DataStream):
 
-    def __init__(self, name: str, stream_id: str, data_type: str, data: Any):
+    def __init__(self, name: str, stream_id: str, data_type: str, data: str
+                 ) -> None:
         super().__init__(name, stream_id, data_type, data)
 
     def process_batch(self, data_batch: List[Any]) -> str:
@@ -62,13 +64,18 @@ class StreamProcessor(DataStream):
     def filter_data(self, data_batch: List[Any],
                     criteria: Optional[str] = None) -> List[Any]:
         output_list: List[Any] = []
+        if not criteria:
+            return []
         for data in data_batch:
             if criteria in str(data):
                 output_list.append(data)
-        return data
+        return output_list
 
     def get_stats(self) -> Dict[str, Union[str, int, float]]:
-        print("data:", self.data)
+
+        print(f"Stream ID: {self.stream_id}, Type: {self.data_type}")
+
+        print("Processing sensor batch:", self.data)
         data_processed = 0
         output_dict: dict[str, Union[str, int, float]] = {}
         for data in self.data:
@@ -83,8 +90,8 @@ class StreamProcessor(DataStream):
                 output_dict["avg"] = data_avg
             if isinstance(data, str):
                 data_num = len(data)
-                print("stats:", data_sum)
-                output_dict["sum"] = data_sum
+                print("stats:", data_num)
+                output_dict["sum"] = data_num
 
             data_processed += 1
         return output_dict
@@ -98,8 +105,8 @@ def data_stream() -> None:
 
     print("Initializing Sensor Stream...")
 
-    Sensor = StreamProcessor("Sensor", "SENSOR_001", "Environmental Data",
-                             {"temp": 22.5, "humidity": 65, "pressure": 1013})
+    Sensor = SensorStream("Sensor", "SENSOR_001", "Environmental Data",
+                          "[temp:22.5, humidity:65, pressure:1013]")
 
     Sensor.get_stats()
 

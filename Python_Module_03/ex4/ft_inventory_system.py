@@ -18,16 +18,27 @@ class InventoryMaster():
 
     def add_items(self, items: dict[str, int]) -> None:
         for name in items:
+            if not name or name == "":
+                raise ValueError("Item name cannot be empty.")
             if name not in self.inventory:
                 self.inventory[name] = 0
-            self.inventory[name] += items[name]
+            add_val = int(items[name])
+            if add_val < 0:
+                print(f"Warning: Negative quantity for '{name}': {add_val}.")
+            self.inventory[name] += add_val
 
     def subtract_items(self, items: dict[str, int]) -> None:
         for name in items:
             if name not in self.inventory:
                 continue
-            self.inventory[name] -= items[name]
+            add_val = int(items[name])
+            if add_val < 0:
+                print(f"Warning: Negative quantity for '{name}': {add_val}.")
+            self.inventory[name] -= add_val
             if self.inventory[name] <= 0:
+                if self.inventory[name] < 0:
+                    print(f"Error: Quatity of '{name}' went negative:"
+                          f" {self.inventory[name]}.")
                 self.inventory.pop(name)
 
     def ft_analyze_inventory(self) -> None:
@@ -51,38 +62,39 @@ class InventoryMaster():
         print("=== Inventory Statistics ===")
         most_abundant = max(self.inventory, key=self.inventory.get)
         least_abundant = min(self.inventory, key=self.inventory.get)
-        print(f"Most abundant: {most_abundant} ({self.inventory[
-            most_abundant]} units)")
-        print(f"Least abundant: {least_abundant} ({self.inventory[
-            least_abundant]} units)")
+        print(f"Most abundant: {most_abundant}",
+              f"({self.inventory[most_abundant]} units)")
+        print(f"Least abundant: {least_abundant}",
+              f" ({self.inventory[least_abundant]} units)")
         print()
         print("=== Inventory Classification ===")
-        moderate_quantaty = {}
-        scarse_quantaty = {}
-        abundent_quantaty = {}
+        abundent_quantity = {}
+        moderate_quantity = {}
+        scarse_quantity = {}
         for name in self.inventory:
             if self.inventory[name] > 10:
-                abundent_quantaty[name] = self.inventory[name]
+                abundent_quantity[name] = self.inventory[name]
             elif self.inventory[name] > 3:
-                moderate_quantaty[name] = self.inventory[name]
+                moderate_quantity[name] = self.inventory[name]
             else:
-                scarse_quantaty[name] = self.inventory[name]
-        if abundent_quantaty:
-            print("Abundant:", abundent_quantaty)
-        if moderate_quantaty:
-            print("Moderate:", moderate_quantaty)
-        if scarse_quantaty:
-            print("Scarce:", scarse_quantaty)
+                scarse_quantity[name] = self.inventory[name]
+        if abundent_quantity:
+            print("Abundant:", abundent_quantity)
+        if moderate_quantity:
+            print("Moderate:", moderate_quantity)
+        if scarse_quantity:
+            print("Scarce:", scarse_quantity)
 
         print()
         print("=== Management Suggestions ===")
-        print("Restock needed:", [item for item in self.inventory
-                                  if self.inventory[item] == 1])
+        print("Restock needed:", ", ".join([item for item in self.inventory
+                                           if self.inventory[item] == 1]))
 
     def demo(self) -> None:
         print("=== Dictionary Properties Demo ===")
-        print("Inventory keys:", list(self.inventory.keys()))
-        print("Inventory values:", list(self.inventory.values()))
+        print("Inventory keys:", ", ".join(self.inventory.keys()))
+        print("Inventory values:", ", ".join(map(str,
+                                                 self.inventory.values())))
         lookup = "sword"
         print(f"Sample lookup - '{lookup}' in inventory:",
               lookup in self.inventory)
@@ -151,21 +163,21 @@ if __name__ == "__main__":
     # {'pixel_sword':
     #   {'type': 'weapon'',
     #   'value': 150',
-    #   'rarity': 'common'}',
-    # 'quantum_ring':
-    #   {'type': 'accessory'',
-    #   'value': 500',
-    #   'rarity': 'rare'}',
+    #   'rarity': 'common'}',,
     # 'health_byte':
     #   {'type': 'consumable'',
     #   'value': 25',
     #   'rarity': 'common'}',
-    # 'data_crystal':
-    #   {'type': 'material'',
-    #   'value': 1000',
-    #   'rarity': 'legendary'}',
     # 'code_bow':
     #   {'type': 'weapon'',
     #   'value': 200',
     #   'rarity': 'uncommon'}
+    # 'quantum_ring':
+    #   {'type': 'accessory'',
+    #   'value': 500',
+    #   'rarity': 'rare'}'
+    # 'data_crystal':
+    #   {'type': 'material'',
+    #   'value': 1000',
+    #   'rarity': 'legendary'}',
     # }}

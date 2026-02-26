@@ -13,7 +13,11 @@ def ft_score_analytics(scores_str: list[str]) -> None:
         return
     scores: list[int] = []
     for score in scores_str:
-        scores.append(int(score.strip()))
+        try:
+            scores.append(int(score.strip()))
+        except ValueError:
+            print(f"Error: Invalid score '{score}'"
+                  "skipped. Scores must be numeric.")
     sum_scores: int = sum(scores)
     average_score: float = sum_scores / count
     high_score: int = max(scores)

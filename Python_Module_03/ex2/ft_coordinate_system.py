@@ -42,14 +42,14 @@ def ft_coordinate_system() -> None:
     point_b = ft_parse_coordinates(point_b_str)
     b_distance = ft_calc_distance(origin, point_b)
     if b_distance is not None:
-        print(f"Distance between {origin} and {point_b}: {b_distance:.2f}")
+        print(f"Distance between {origin} and {point_b}: {b_distance:.1f}")
     print()
     point_c_str = "abc,def,ghi"
     print(f"Parsing coordinates: \"{point_c_str}\"")
     point_c = ft_parse_coordinates(point_c_str)
     c_distance = ft_calc_distance(origin, point_c)
     if c_distance is not None:
-        print(f"Distance between {origin} and {point_b}: {c_distance:.2f}")
+        print(f"Distance between {origin} and {point_c}: {c_distance:.1f}")
     print()
     print("Unpacking demonstration:")
     print(f"Player at x={point_b[0]}, y={point_b[1]}, z={point_b[2]}")

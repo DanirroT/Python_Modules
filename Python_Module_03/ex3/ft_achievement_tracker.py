@@ -16,21 +16,23 @@ class Player():
         if any acivements are detected based on level or killcount, adds them
         to the achivements set."""
 
+        if not name or name == "":
+            raise ValueError("Player name cannot be empty.")
         self.name = name
-        self.kill_count = kill_count
-        self.level = level
-        self.achivements = set()
+        self.kill_count = int(kill_count)
+        self.level = int(level)
+        self.achivements: set[str] = set()
         self.check_kill_achievements()
         self.check_level_achievements()
 
     def add_achievement(self, achievements: list[str]) -> None:
         """Adds a list of achievements to the player's achievement set."""
-        for achievement in achievements:
-            self.achivements.add(achievement)
+        for acm in achievements:
+            self.achivements.add(acm)
 
     def level_up(self, levels: int) -> None:
         """Increases the player's level by a specified number of levels."""
-        self.level += levels
+        self.level += int(levels)
         self.check_level_achievements()
 
     def check_level_achievements(self) -> None:
@@ -75,25 +77,25 @@ class PlayerAnalytics():
         Analyzes the achievements of the players and prints various
         statistics."""
 
-        achievements_present = set()
-        achievements_in_common = self.achievement_list.copy()
-        rare_achievements = set()
+        acms_present: set[str] = set()
+        acms_in_common = self.achievement_list.copy()
+        rare_acms = set()
         for player in self.players:
-            achievements_present.update(player.achivements)
-            achievements_in_common.intersection_update(player.achivements)
+            acms_present = acms_present.union(player.achivements)
+            acms_in_common = acms_in_common.intersection(player.achivements)
 
-        rare_achievements = {achievement
-                             for achievement in achievements_present
-                             if sum(achievement in player.achivements
-                                    for player in self.players)
-                             == 1}
+        rare_acms = {acm
+                     for acm in acms_present
+                     if sum(acm in player.achivements
+                            for player in self.players)
+                     == 1}
 
-        print(f"All unique achievements: {achievements_present}")
-        print(f"Total unique achievements: {len(achievements_present)}")
+        print(f"All unique achievements: {acms_present}")
+        print(f"Total unique achievements: {len(acms_present)}")
         print()
-        print(f"Common to all players: {achievements_in_common}")
+        print(f"Common to all players: {acms_in_common}")
 
-        print(f"Rare achievements (1 player): {rare_achievements}")
+        print(f"Rare achievements (1 player): {rare_acms}")
 
     def compare(self, i1: int, i2: int) -> None:
         if self.players[i1] is None or self.players[i2] is None:
@@ -102,7 +104,7 @@ class PlayerAnalytics():
         player1 = self.players[i1]
         player2 = self.players[i2]
         common = player1.achivements.intersection(player2.achivements)
-        print(f"player1 vs player2 common: {common}")
+        print(f"{player1.name} vs {player2.name} common: {common}")
         player1_unique = player1.achivements.difference(player2.achivements)
         player2_unique = player2.achivements.difference(player1.achivements)
         print(f"{player1.name} unique: {player1_unique}")
