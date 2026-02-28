@@ -108,50 +108,53 @@ class DataStream(ABC):
 
 class SensorType(DataType):
     def __init__(self, label, value):
-        self.label = label
-        self.value = value
+        self._label = label
+        self._value = value
+
+    def __str__(self):
+        return f"{self._label}:{self._value}"
+
+    def label(self):
+        return self._label
+
+    def value(self):
+        return self._value
 
 class SensorStream(DataStream):
+
+    dataStrings = []
+    data_processed = 0
+    stats = {}
 
     def __init__(self, name: str, stream_id: str, data_type: str) -> None:
         super().__init__(name, stream_id, data_type)
 
-    def process_batch(self, data_batch: List[dict[str, Union[int, float]]]
+    def process(self, data):
+        self.dataStrings.append(str(data))
+
+        self.data_processed += 1
+
+        self.stats[data.label() + "_num"] = self.stats[data.label() + "_num"] + 1 if data.label() + "_num" in self.stats else 1
+        self.stats[data.label() + "_sum"] = self.stats[data.label() + "_sum"] + data.value() if data.label() + "_sum" in self.stats else data.value()
+        self.stats[data.label() + "_avg"] = self.stats[data.label() + "_sum"] / self.stats[data.label() + "_num"]
+
+    def get_stats(self) -> dict[str, str | int | float]:
+        return self.stats
+
+    def process_batch(self, data_batch: List[SensorType]
                       ) -> str:
 
-        formatted_input = ", ".join(f"{key}:{value}"
-                                    for d in data_batch
-                                    for key, value in d.items()
-                                    )
+        for d in data_batch:
+            self.process(d)
 
         print(f"Stream ID: {self.stream_id}, Type: {self.data_type}")
 
+        formatted_input = ", ".join(self.dataStrings)
         print(f"Processing sensor batch: [{formatted_input}]")
-
-        data_dict: dict[str, list[int | float]] = {}
-        for simple_dict in data_batch:
-
-            val_name, val_str = next(iter(simple_dict.items()))
-
-            if not val_name or val_name == "":
-                raise ValueError("Stream value name cannot be empty.")
-            if isinstance(val_str, (int, float)):
-                val = val_str
-            else:
-                try:
-                    val = float(val_str)
-                except (ValueError):
-                    raise ValueError("Stream value must be numeric.")
-
-            if val_name not in data_dict:
-                data_dict[val_name] = []
-            data_dict[val_name].append(val)
-
-        self.data = data_dict
 
         stats = self.get_stats()
 
-        output_std = f"Sensor analysis: {len(data_batch)} readings processed"
+        output_std = f"Sensor analysis: {len(self.dataStrings)} readings processed"
 
         output_extra = None
         unit = ""
@@ -175,24 +178,6 @@ class SensorStream(DataStream):
             return [data for data in data_batch if criteria in str(data)]
         """
 
-    def get_stats(self) -> dict[str, str | int | float]:
-
-        data_processed = 0
-        output_dict: dict[str, Union[int, float]] = {}
-        for data_name, data in self.data.items():
-            data_num = len(data)
-            data_sum = sum(data)
-            data_avg = data_sum / data_num
-
-            output_dict[data_name + "_num"] = data_num
-            output_dict[data_name + "_sum"] = data_sum
-            output_dict[data_name + "_avg"] = data_avg
-
-            data_processed += 1
-        output_dict["processed"] = data_processed
-
-        return output_dict
-
     def unit(self, data_name: str) -> str:
 
         if data_name == "temp":
@@ -204,6 +189,20 @@ class SensorStream(DataStream):
         else:
             return ""
 
+
+class TransactionType(DataType):
+    def __init__(self, label, value):
+        self._label = label
+        self._value = value
+
+    def __str__(self):
+        return f"{self._label}:{self._value}"
+
+    def label(self):
+        return self._label
+
+    def value(self):
+        return self._value
 
 class TransactionStream(DataStream):
 
@@ -430,12 +429,14 @@ def data_stream() -> None:
 
     print(Sensor.process_batch(
         [
-            {"temp": 22.5},  # °C
-            {"humidity": 65},  # %
-            {"pressure": 1013}  # hPa
+            SensorType("temp", 22.5),  # °C
+            SensorType("humidity", 65),  # %
+            SensorType("pressure", 1013)  # hPa
         ]
     ))
     print()
+
+    """
     print("Initializing Transaction Stream...")
 
     Transaction = TransactionStream("Transaction", "TRANS_001",
@@ -482,9 +483,18 @@ def data_stream() -> None:
     Event_to_process.process_batch(["login", "error", "logout"])
 
     processor = StreamProcessor()
+    processor.process_batch(
+      [
+        SensorType()
+        TransactionType()
+        ..
+      ]
+    )
+
+    processor = StreamProcessor()
 
     processor.process_batch
-
+    """
     print()
 
     print("All streams processed successfully. Nexus throughput optimal.")

@@ -8,48 +8,78 @@ class SensorStream():
     name: str
     stream_id: str
     data_type: str
-    raw_data: str
-    processed_data: dict[str, list[Union[int, float]]]
+    data: dict[str, list[Union[int, float]]]
 
-    def __init__(self, name: str, stream_id: str, data_type: str, data_str: str
-                 ) -> None:
-        
+    def __init__(self, name: str, stream_id: str, data_type: str) -> None:
+
         if not name or name == "":
             raise ValueError("Stream name cannot be empty.")
         self.name = name
+        if not stream_id or stream_id == "":
+            raise ValueError("Stream ID cannot be empty.")
         self.stream_id = stream_id
+        if not data_type or data_type == "":
+            raise ValueError("Stream Type cannot be empty.")
         self.data_type = data_type
-        self.raw_data = data_str
-        print("\ngiven data:", self.raw_data)
+
+    def process_batch(self, data_batch: List[dict[str, Union[int, float]]]
+                      ) -> str:
+
+        formatted_input = ", ".join(f"{key}:{value}"
+                                    for d in data_batch
+                                    for key, value in d.items()
+                                    )
+
+        print(f"Processing sensor batch: [{formatted_input}]")
+
         print()
-        data_list = self.raw_data.strip("[]").split(", ")
-        print("Parsed data:", data_list)
-        print()
+
         data_dict: dict[str, list[int | float]] = {}
-        for item in data_list:
-            val_name, val_str = item.split(":")
+        for simple_dict in data_batch:
+
+            val_name, val_str = next(iter(simple_dict.items()))
+
+            print("val name and val:", val_name, val_str)
+
             if not val_name or val_name == "":
                 raise ValueError("Stream value name cannot be empty.")
-            val = float(val_str)
+            if isinstance(val_str, (int, float)):
+                val = val_str
+            else:
+                try:
+                    val = float(val_str)
+                except (ValueError):
+                    raise ValueError("Stream value must be numeric.")
+
             if val_name not in data_dict:
                 data_dict[val_name] = []
             data_dict[val_name].append(val)
+
         print("Parsed data:", data_dict)
         print()
-        self.processed_data = data_dict
+        self.data = data_dict
 
-    def process_batch(self, data_batch: List[Any]) -> str:
-        print("Processing sensor batch:", self.data)
+        stats = self.get_stats()
+
+        output_std = (f"Sensor analysis: {stats["processed"]}"
+                      "readings processed")
+
+        unit = ""
+        lookup_stat = "num"
+        lookup_stat_name = "temp"
+        output_data = stats["temp" + "_" + lookup_stat]
+        if lookup_stat == "avg":
+            unit = self.unit(lookup_stat_name)
+
+        output_extra = f"{lookup_stat} {lookup_stat_name}: {output_data}{unit}"
+
+        return ", ".join((output_std, output_extra))
 
     def filter_data(self, data_batch: List[Any],
                     criteria: Optional[str] = None) -> List[Any]:
-        output_list: List[Any] = []
         if not criteria:
-            return []
-        for data in data_batch:
-            if criteria in str(data):
-                output_list.append(data)
-        return output_list
+            return data_batch
+        return [data for data in data_batch if criteria in str(data)]
 
     def get_stats(self) -> Dict[str, Union[str, int, float]]:
 
@@ -57,19 +87,34 @@ class SensorStream():
 
         data_processed = 0
         output_dict: dict[str, Union[str, int, float]] = {}
-        for data_name, data in self.processed_data.items():
+        for data_name, data in self.data.items():
             data_num = len(data)
             data_sum = sum(data)
             data_avg = data_sum / data_num
 
             print("stats:", data_num, data_sum, data_avg)
 
-            output_dict[data_name + "_sum"] = data_sum
             output_dict[data_name + "_num"] = data_num
+            output_dict[data_name + "_sum"] = data_sum
             output_dict[data_name + "_avg"] = data_avg
 
             data_processed += 1
+        output_dict["processed"] = data_processed
+
+        print("Output stats:", output_dict)
+
         return output_dict
+
+    def unit(self, data_name: str) -> str:
+
+        if data_name == "temp":
+            return "°C"
+        elif data_name == "humidity":
+            return "%"
+        elif data_name == "pressure":
+            return "hPa"
+        else:
+            return ""
 
 
 def data_stream() -> None:
@@ -80,12 +125,22 @@ def data_stream() -> None:
 
     print("Initializing Sensor Stream...")
 
-    Sensor = SensorStream("Sensor", "SENSOR_001", "Environmental Data",
-                          "[temp:22.5, temp:2.5, humidity:65, pressure:1013]")
+    Sensor = SensorStream("Sensor", "SENSOR_001", "Environmental Data")
 
-    Sensor.get_stats()
+    """
+    print(Sensor.process_batch([
+                               {"temp": 22.5},  # °C
+                               {"humidity": 65},  # %
+                               {"pressure": 1013}  # hPa
+                               ]))"""
 
-    Sensor.filter_data(Sensor.processed_data, "temp_avg")
+    print(Sensor.filter_data([
+                             {"temp": 22.5},
+                             {"humidity": 65},
+                             {"pressure": 1013}
+                             ],
+                             criteria="t"
+                             ))
 
     # print()
 
@@ -116,7 +171,10 @@ if __name__ == "__main__":
     data_stream()
 
 
-Your Mission: Create a sophisticated data streaming system that demonstrates advanced polymorphic behavior. Build stream handlers that can process mixed data types while maintaining type-specific optimizations.
+"""
+Your Mission: Create a sophisticated data streaming system that demonstrates
+advanced polymorphic behavior. Build stream handlers that can process mixed
+data types while maintaining type-specific optimizations.
 Advanced Architecture:
 • Stream Base: DataStream - an abstract base class with core streaming functionality
 • Specialized Streams: SensorStream(stream_id), TransactionStream(stream_id), EventStream(stream_id)
@@ -174,3 +232,4 @@ Stream filtering active: High-priority data only
 Filtered results: 2 critical sensor alerts, 1 large transaction
 
 All streams processed successfully. Nexus throughput optimal.
+"""
