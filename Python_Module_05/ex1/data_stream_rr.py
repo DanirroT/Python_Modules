@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional, Tuple, Union  # noqa: F401
 
+git config --global user.name "Daniel Ribeiro"
 
 class DataType(ABC):
     ...
