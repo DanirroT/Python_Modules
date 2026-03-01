@@ -11,7 +11,7 @@ class CreatureCard(Card):
     def __init__(self, name: str, cost: int, rarity: str,
                  attack: int, health: int) -> None:
 
-        super().__init__(name, rarity, cost)
+        super().__init__(name, cost, rarity)
 
         self.type = "Creature"
 
