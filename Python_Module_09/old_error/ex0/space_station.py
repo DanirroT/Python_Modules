@@ -5,7 +5,7 @@ from typing import Optional
 
 # import json, csv
 
-from datetime import date
+from datetime import datetime, date
 
 # for this project to work, use:
 #   python -m ex0.main
@@ -28,24 +28,32 @@ class SpaceStation():
                  last_maintenance: datetime, is_operational: bool = True,
                  notes: Optional[str] = None) -> None:
 
+        class_name = self.__class__.__name__ + " "
+
         try:
 
-            self.station_id = self.str_len_check(station_id, 3, 10)
+            self.station_id = self.str_len_check(
+                class_name + "ID", station_id, 3, 10)
 
-            self.name = self.str_len_check(name, 1, 50)
+            self.name = self.str_len_check(
+                class_name + "Crew Size", name, 1, 50)
 
-            self.crew_size = self.int_val_check(crew_size, 1, 20)
+            self.crew_size = self.int_val_check(
+                class_name + "Crew Size", crew_size, 1, 20)
 
-            self.power_level = self.float_val_check(power_level, 0, 100)
+            self.power_level = self.float_val_check(
+                class_name + "Power Level", power_level, 0, 100)
 
-            self.oxygen_level = self.float_val_check(oxygen_level, 0, 100)
+            self.oxygen_level = self.float_val_check(
+                class_name + "Power Level", oxygen_level, 0, 100)
 
             self.last_maintenance = last_maintenance
 
             self.is_operational = True if is_operational else False
 
             if notes:
-                self.notes = self.str_len_check(notes, 0, 200)
+                self.notes = self.str_len_check(
+                    class_name + "notes", notes, 0, 200)
             else:
                 self.notes = None
 
@@ -53,52 +61,53 @@ class SpaceStation():
             print(e)
 
     @staticmethod
-    def str_len_check(field_input: str, min: int, max: int) -> str:
+    def str_len_check(field_name: str, field_input: str, min: int, max: int
+                      ) -> str:
         if not field_input or field_input == "":
-            raise ValueError("Input cannot be empty.")
+            raise ValueError(f"{field_name} cannot be empty.")
         if len(field_input) < min:
-            raise ValueError(
-                f"Input should be larger than or equal to {min} char")
+            raise ValueError(f"{field_name} too short (min={min}).")
         if len(field_input) > max:
-            raise ValueError(
-                f"Input should be smaller than or equal to {max} char")
+            raise ValueError(f"{field_name} too long (max={max}).")
 
         return field_input
 
     @staticmethod
-    def int_val_check(field_input: int, min: int, max: int) -> int:
+    def int_val_check(field_name: str, field_input: int, min: int, max: int
+                      ) -> int:
         try:
             field_int = int(field_input)
         except ValueError:
-            raise ValueError("Input must be numeric.")
+            raise ValueError(f"{field_name} must be numeric.")
         if field_int < min:
             if min == 0:
-                raise ValueError("Input must be positive.")
-            raise ValueError(f"Input should be more than or equal to {min}")
+                raise ValueError(f"{field_name} must be positive.")
+            raise ValueError(f"{field_name} too short (min={min}).")
         if field_int > max:
             if max == 0:
-                raise ValueError("Input must be negative.")
-            raise ValueError(f"Input should be less than or equal to {max}")
+                raise ValueError(f"{field_name} must be negative.")
+            raise ValueError(f"{field_name} too long (max={max}).")
 
         return field_int
 
     @staticmethod
-    def float_val_check(field_input: float, min: int, max: int) -> float:
+    def float_val_check(field_name: str, field_input: float, min: int, max: int
+                        ) -> float:
         try:
             field_float = float(field_input)
         except ValueError:
-            raise ValueError("Input must be numeric.")
+            raise ValueError(f"{field_name} must be numeric.")
         if (min == 0 and max == 100
                 and field_float < min and field_float > max):
             raise ValueError("SpaceStation Oxygen Level be a percentage.")
         if field_float < min:
             if min == 0:
-                raise ValueError("Input must be positive.")
-            raise ValueError(f"Input should be more than or equal to {min}")
+                raise ValueError(f"{field_name} must be positive.")
+            raise ValueError(f"{field_name} too small (min={min}).")
         if field_float > max:
             if max == 0:
-                raise ValueError("Input must be negative.")
-            raise ValueError(f"Input should be less than or equal to {max}")
+                raise ValueError(f"{field_name} must be negative.")
+            raise ValueError(f"{field_name} too large (max={max}).")
 
         return field_float
 
@@ -111,7 +120,7 @@ if __name__ == "__main__":
 
     space_station_1 = SpaceStation(
         "ISS001", "International Space Station",
-        6, 85.5, 92.3, date.today())
+        6, 85.5, 92.3, datetime.now())
 
     print("Valid station created:")
 
@@ -131,4 +140,4 @@ if __name__ == "__main__":
 
     space_station_2 = SpaceStation(
         "ISS_null", "Off Brand ISS",
-        60, 20.5, 2.3, date.today())
+        60, 20.5, 2.3, datetime.now())
