@@ -5,7 +5,12 @@ from typing import Optional
 
 # import json, csv
 
+from pydantic import field
 from datetime import date
+
+# pip install pydantic pydantic-settings
+
+# www.geeksforgeeks.org/python/introduction-to-python-pydantic-library/
 
 # for this project to work, use:
 #   python -m ex0.main

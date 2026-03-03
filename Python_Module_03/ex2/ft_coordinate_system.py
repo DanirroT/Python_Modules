@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-def ft_calc_distance(statrt: tuple[float, float, float] | None,
+def ft_calc_distance(start: tuple[float, float, float] | None,
                      end: tuple[float, float, float] | None
                      ) -> float | None:
     """Calculate the distance between two points in 3D space."""
-    if not statrt or not end:
+    if not start or not end:
         return None
-    x1, y1, z1 = statrt
+    x1, y1, z1 = start
     x2, y2, z2 = end
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2) ** 0.5
 

@@ -3,7 +3,8 @@
 class Player():
     """
     Class to Manage Players. Has name, kill_count, level and
-    achivements as inbuilt variables."""
+    achivements as inbuilt variables.
+    """
     name: str
     location: str
     kill_count: int
@@ -90,12 +91,25 @@ def dict_comprehension(player_list: list[Player]) -> None:
                      for player in player_list
                      if player.active}
 
+    score_brackets = {"high": 0, "medium": 0, "low": 0}
+
+    for player in player_list:
+        print(player.score)
+        if player.score > 2500:
+            score_brackets["high"] += 1
+
+        elif player.score > 2000:
+            score_brackets["medium"] += 1
+
+        else:
+            score_brackets["low"] += 1
+
     achievement_count_active = {player.name: len(player.achivements)
                                 for player in player_list
                                 if player.active}
 
     print("Player scores:", scores_active)
-    print("Score categories:", {'high': 3, 'medium': 2, 'low': 1})
+    print("Score categories:", score_brackets)
     print("Achievement counts:", achievement_count_active)
 
 

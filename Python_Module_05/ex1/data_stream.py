@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional, Tuple, Union  # noqa: F401
+from typing import List, Dict, Any, Optional, Type, Union  # noqa: F401
 
 
 class DataType(ABC):
-    ...
+    pass
 
 
 class DataStream(ABC):
@@ -107,45 +107,45 @@ class DataStream(ABC):
 
 
 class SensorType(DataType):
-    def __init__(self, label, value):
+
+    label: str
+    value: Union[int, float]
+
+    def __init__(self, label, value) -> None:
         self.label = label
         self.value = value
+
 
 class SensorStream(DataStream):
 
     def __init__(self, name: str, stream_id: str, data_type: str) -> None:
         super().__init__(name, stream_id, data_type)
 
-    def process_batch(self, data_batch: List[dict[str, Union[int, float]]]
-                      ) -> str:
+    def process_batch(self, data_batch: List[SensorType]) -> str:
 
-        formatted_input = ", ".join(f"{key}:{value}"
-                                    for d in data_batch
-                                    for key, value in d.items()
-                                    )
+        formatted_input = ", ".join(f"{data.label}:{data.value}"
+                                    for data in data_batch)
 
         print(f"Stream ID: {self.stream_id}, Type: {self.data_type}")
 
         print(f"Processing sensor batch: [{formatted_input}]")
 
         data_dict: dict[str, list[int | float]] = {}
-        for simple_dict in data_batch:
+        for data_point in data_batch:
 
-            val_name, val_str = next(iter(simple_dict.items()))
-
-            if not val_name or val_name == "":
+            if not data_point.label or data_point.label == "":
                 raise ValueError("Stream value name cannot be empty.")
-            if isinstance(val_str, (int, float)):
-                val = val_str
+            if isinstance(data_point.value, (int, float)):
+                val = data_point.value
             else:
                 try:
-                    val = float(val_str)
+                    val = float(data_point.value)
                 except (ValueError):
                     raise ValueError("Stream value must be numeric.")
 
-            if val_name not in data_dict:
-                data_dict[val_name] = []
-            data_dict[val_name].append(val)
+            if data_point.label not in data_dict:
+                data_dict[data_point.label] = []
+            data_dict[data_point.label].append(val)
 
         self.data = data_dict
 
@@ -155,7 +155,7 @@ class SensorStream(DataStream):
 
         output_extra = None
         unit = ""
-        lookup_stat = "num"
+        lookup_stat = "avg"
         lookup_stat_name = "temp"
         output_data = stats["temp" + "_" + lookup_stat]
         if lookup_stat == "avg":
@@ -205,41 +205,47 @@ class SensorStream(DataStream):
             return ""
 
 
+class TransactionType(DataType):
+
+    label: str
+    value: Union[int, float]
+
+    def __init__(self, label, value) -> None:
+        self.label = label
+        self.value = value
+
+
 class TransactionStream(DataStream):
 
     def __init__(self, name: str, stream_id: str, data_type: str) -> None:
         super().__init__(name, stream_id, data_type)
 
-    def process_batch(self, data_batch: List[dict[str, Union[int, float]]]
+    def process_batch(self, data_batch: List[TransactionType]
                       ) -> str:
 
-        formatted_input = ", ".join(f"{key}:{value}"
-                                    for d in data_batch
-                                    for key, value in d.items()
-                                    )
+        formatted_input = ", ".join(f"{data.label}:{data.value}"
+                                    for data in data_batch)
 
         print(f"Stream ID: {self.stream_id}, Type: {self.data_type}")
 
         print(f"Processing transaction batch: [{formatted_input}]")
 
         data_dict: dict[str, list[int | float]] = {}
-        for simple_dict in data_batch:
+        for data_point in data_batch:
 
-            val_name, val_str = next(iter(simple_dict.items()))
-
-            if not val_name or val_name == "":
+            if not data_point.label or data_point.label == "":
                 raise ValueError("Stream value name cannot be empty.")
-            if isinstance(val_str, (int, float)):
-                val = val_str
+            if isinstance(data_point.value, (int, float)):
+                val = data_point.value
             else:
                 try:
-                    val = float(val_str)
+                    val = float(data_point.value)
                 except (ValueError):
                     raise ValueError("Stream value must be numeric.")
 
-            if val_name not in data_dict:
-                data_dict[val_name] = []
-            data_dict[val_name].append(val)
+            if data_point.label not in data_dict:
+                data_dict[data_point.label] = []
+            data_dict[data_point.label].append(val)
 
         self.data = data_dict
 
@@ -290,30 +296,38 @@ class TransactionStream(DataStream):
         return output_dict
 
 
+class EventType(DataType):
+
+    event: str
+
+    def __init__(self, event) -> None:
+        self.event = event
+
+
 class EventStream(DataStream):
 
     def __init__(self, name: str, stream_id: str, data_type: str) -> None:
         super().__init__(name, stream_id, data_type)
 
-    def process_batch(self, data_batch: List[str]) -> str:
+    def process_batch(self, data_batch: List[EventType]) -> str:
 
-        formatted_input = ", ".join(dta for dta in data_batch)
+        formatted_input = ", ".join(data.event for data in data_batch)
 
         print(f"Stream ID: {self.stream_id}, Type: {self.data_type}")
 
         print(f"Processing event batch: [{formatted_input}]")
 
         data_list: list[str] = []
-        for inp in data_batch:
+        for data_point in data_batch:
 
-            if not inp or inp == "":
+            if not data_point.event or data_point.event == "":
                 raise ValueError("Stream value cannot be empty.")
-            if isinstance(inp, str):
-                val = inp
+            if isinstance(data_point.event, str):
+                val = data_point.event
             else:
                 try:
-                    val = str(inp)
-                except (ValueError):
+                    val = str(data_point.event)
+                except ValueError:
                     raise ValueError("Stream value must be a string.")
 
             data_list.append(val)
@@ -370,120 +384,166 @@ class EventStream(DataStream):
 
         return output_dict
 
+    @classmethod
+    def get_class_name(cls) -> str:
+        return cls.__name__
+
+
+class OtherType(DataType):
+
+    other: str
+
+    def __init__(self, other) -> None:
+        self.other = other
+
 
 class StreamProcessor():
 
     name: str
-    stream_list: List[DataStream]
+    batch_num: int
+    stream_list: dict[Type, Type]
 
-    def __init__(self, name: str, stream_list: List[DataStream]) -> None:
+    def __init__(self, name: str) -> None:
 
         if not name or name == "":
             raise ValueError("Stream name cannot be empty.")
         self.name = name
 
-        self.stream_list = stream_list
+        self.batch_num = 0
+        self.stream_list = {SensorStream: SensorType,
+                            TransactionStream: TransactionType,
+                            EventStream: EventType}
 
-    def add_stream(self, stream: DataStream) -> None:
-        self.stream_list.append(stream)
+    def process_all_batches(self, batches: List[DataType]) -> str:
 
-    def process_all_batches(self, batches: List[Any]) -> str:
+        # print(batches)
+        # print()
+        # print(self.stream_list)
+        # print()
 
-        num = 1
-        return_string = f"Batch {num} Results:"
-        processed_data: DataStream
-        sensor_processed = 0
-        transaction_processed = 0
-        event_processed = 0
-        if "Sensor analysis" in batches:
-            sensor_processed += 1
-        if "Transaction analysis" in batches:
-            transaction_processed += 1
-        if "Event analysis" in batches:
-            event_processed += 1
+        self.batch_num += 1
+        return_string = f"Batch {self.batch_num} Results:"
 
-        if sensor_processed:
-            return_string += (f"\n- Sensor data: {sensor_processed}"
-                              "readings processed")
-        if transaction_processed:
-            return_string += (f"\n- Transaction data: {transaction_processed}"
-                              "operations processed")
-        if event_processed:
-            return_string += (f"\n- Event data: {event_processed}"
-                              "events processed")
+        processed_dict: dict[str, int] = {stream_type.__name__: 0
+                                          for stream_type in self.stream_list}
+        processed_dict["Other"] = 0
+
+        # print("processed_dict", processed_dict)
+        # print()
+
+        for data in batches:
+            # print("data", data.__class__.__name__)
+            found = False
+            for data_stream, data_types in self.stream_list.items():
+                # print(
+                # "\tstream_type", data_stream.__name__, data_types.__name__)
+                if data.__class__ == data_types:
+                    found = True
+                    processed_dict[data_stream.__name__] += 1
+                    
+                    break
+            if not found:
+                processed_dict["Other"] += 1
+
+        if processed_dict["SensorStream"]:
+            return_string += (
+                f"\n- Sensor data: {processed_dict["SensorStream"]}"
+                " readings processed")
+        if processed_dict["TransactionStream"]:
+            return_string += (
+                f"\n- Transaction data: {processed_dict["TransactionStream"]}"
+                " operations processed")
+        if processed_dict["EventStream"]:
+            return_string += (
+                f"\n- Event data: {processed_dict["EventStream"]}"
+                " events processed")
+
+        # print("processed_dict", processed_dict)
+
+        return_string += "\nStream filtering active: High-priority data only\n"
+
+        filtered_results: dict[str, int] = {
+            stream_type.__name__: 0 for stream_type in self.stream_list}
+        filtered_results["Other"] = 0
+
+        if sum(filtered_results.values()):
+            return_string += "Filtered results:"
+            if filtered_results["SensorStream"]:
+                return_string += (f"{filtered_results["SensorStream"]}"
+                                  " critical sensor alerts")
+            if filtered_results["TransactionStream"]:
+                return_string += (f"{filtered_results["TransactionStream"]}"
+                                  " large transaction")
+            if filtered_results["EventStream"]:
+                return_string += (f"{filtered_results["EventStream"]}"
+                                  " errors detected")
+        else:
+            return_string += "No High-priority data"
 
         return return_string
-
-    def filter_all(self, criteria: str) -> List[Any]:
-        if not criteria:
-            return data_batch
-        return [data for data in data_batch if criteria in str(data)]
 
 
 def data_stream() -> None:
 
-    print("=== CODE NEXUS - POLYMORPHIC STREAM SYSTEM ===")
-    print()
-    print("Initializing Sensor Stream...")
+    # print("=== CODE NEXUS - POLYMORPHIC STREAM SYSTEM ===")
+    # print()
+    # print("Initializing Sensor Stream...")
 
-    Sensor = SensorStream("Sensor", "SENSOR_001", "Environmental Data")
+    # Sensor = SensorStream("Sensor", "SENSOR_001", "Environmental Data")
 
-    print(Sensor.process_batch(
-        [
-            {"temp": 22.5},  # °C
-            {"humidity": 65},  # %
-            {"pressure": 1013}  # hPa
-        ]
-    ))
-    print()
-    print("Initializing Transaction Stream...")
+    # print(Sensor.process_batch([
+    #     SensorType("temp", 22.5),  # °C
+    #     SensorType("humidity", 65),  # %
+    #     SensorType("pressure", 1013)  # hPa
+    # ]))
 
-    Transaction = TransactionStream("Transaction", "TRANS_001",
-                                    "Financial Data")
+    # print()
 
-    print(Transaction.process_batch([
-                               {"buy": 100},
-                               {"sell": 150},
-                               {"buy": 75}
-                               ]))
+    # print("Initializing Transaction Stream...")
 
-    print()
+    # Transaction = TransactionStream("Transaction", "TRANS_001",
+    #                                 "Financial Data")
 
-    print("Initializing Event Stream...")
+    # print(Transaction.process_batch([
+    #     TransactionType("buy", 100),
+    #     TransactionType("sell", 150),
+    #     TransactionType("buy", 75)
+    # ]))
 
-    Event = EventStream("Event", "EVENT_001", "System Events")
+    # print()
 
-    print(Event.process_batch(["login", "error", "logout"]))
+    # print("Initializing Event Stream...")
+
+    # Event = EventStream("Event", "EVENT_001", "System Events")
+
+    # print(Event.process_batch([
+    #     EventType("login"),
+    #     EventType("error"),
+    #     EventType("logout")
+    # ]))
 
     print()
 
     print("=== Polymorphic Stream Processing ===")
 
-    Sensor_to_process = SensorStream("Sensor", "SENSOR_001",
-                                     "Environmental Data")
+    print("Processing mixed stream types through unified interface...")
 
-    Sensor_to_process.process_batch([
-                               {"temp": 22.5},  # °C
-                               {"humidity": 65},  # %
-                               {"pressure": 1013}  # hPa
-                               ])
+    print()
 
-    Transaction_to_process = TransactionStream("Transaction", "TRANS_001",
-                                               "Financial Data")
+    poly_stream = StreamProcessor("Poly")
 
-    Transaction_to_process.process_batch([
-                               {"buy": 100},
-                               {"sell": 150},
-                               {"buy": 75}
-                               ])
-
-    Event_to_process = EventStream("Event", "EVENT_001", "System Events")
-
-    Event_to_process.process_batch(["login", "error", "logout"])
-
-    processor = StreamProcessor()
-
-    processor.process_batch
+    print(poly_stream.process_all_batches([
+        EventType("login"),
+        SensorType("temp", 42.5),
+        TransactionType("buy", 100),
+        TransactionType("sell", 150),
+        TransactionType("buy", 75),
+        EventType("error"),
+        TransactionType("sell", 1500),
+        SensorType("humidity", 95),
+        EventType("logout"),
+        OtherType("other")
+    ]))
 
     print()
 
