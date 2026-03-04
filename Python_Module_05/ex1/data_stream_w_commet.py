@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional, Type, Union
+from typing import List, Dict, Any, Optional, Type, Union  # noqa: F401
 
 
 class DataType(ABC):
@@ -172,6 +172,7 @@ class SensorStream(DataStream):
 
     def filter_data(self, data_batch: List[SensorType],
                     criteria: Optional[str] = None) -> List[SensorType]:
+        print("\nin sensor!", criteria, end=" | ")
         if not criteria:
             return data_batch
         if criteria == "high-priority":
@@ -271,7 +272,7 @@ class TransactionStream(DataStream):
         output_std = f"Transaction analysis: {len(data_batch)}"
 
         output_extra = None
-        net_flow: int = stats["net_flow"]
+        net_flow = stats["net_flow"]
         sign = "+" if (net_flow >= 0) else ""
 
         if net_flow:
@@ -284,6 +285,7 @@ class TransactionStream(DataStream):
         if not criteria:
             return data_batch
         if criteria == "high-priority":
+            print("\nin transaction!", end=" | ")
             return [data for data in data_batch if data.value > 1000]
         return [data for data in data_batch if criteria in str(data.__dict__)]
 
@@ -369,6 +371,7 @@ class EventStream(DataStream):
         if not criteria:
             return data_batch
         if criteria == "high-priority":
+            print("\nin event!", end=" | ")
             return [data for data in data_batch
                     if "error" in str(data.event).lower()]
         return [data for data in data_batch if criteria in str(data.__dict__)]
@@ -434,6 +437,11 @@ class StreamProcessor():
 
     def process_all_batches(self, batches: List[DataType]) -> str:
 
+        # print(batches)
+        # print()
+        # print(self.stream_list)
+        # print()
+
         self.batch_num += 1
         return_string = f"Batch {self.batch_num} Results:"
 
@@ -441,9 +449,15 @@ class StreamProcessor():
                                           for stream_type in self.stream_list}
         processed_dict["Other"] = 0
 
+        # print("processed_dict", processed_dict)
+        # print()
+
         for data in batches:
+            # print("data", data.__class__.__name__)
             found = False
             for data_stream, data_types in self.stream_list.items():
+                # print(
+                # "\tstream_type", data_stream.__name__, data_types.__name__)
                 if data.__class__ == data_types:
                     found = True
                     processed_dict[data_stream.__name__] += 1
@@ -469,7 +483,9 @@ class StreamProcessor():
                 f"\n- Other data: {processed_dict['Other']}"
                 " items processed")
 
-        return_string += ("\n\nStream filtering active: "
+        # print("processed_dict", processed_dict)
+
+        return_string += ("\n\nStream filtering active:"
                           "High-priority data only\n")
 
         filtered_results: dict[str, int] = {
@@ -477,34 +493,39 @@ class StreamProcessor():
         filtered_results["Other"] = 0
 
         for data in batches:
+            print("data:", data.__dict__, end=" | ")
             found = False
             for data_stream, data_type in self.stream_list.items():
                 if data.__class__ == data_type:
+                    print("type:", data_type.__name__,
+                          "using:", data_stream.__name__, end=" | ")
                     found = True
                     filtered_data = data_stream.filter_data(
                         self, data_batch=[data], criteria="high-priority")
                     filtered_results[data_stream.__name__] += len(
                         filtered_data)
+                    print("filtered:", [data.__dict__
+                                        for data in filtered_data])
                     break
             if not found:
                 filtered_data = DataStream.filter_data(
                     self, data_batch=[data], criteria="high-priority")
                 filtered_results["Other"] += 1
+                print("filtered:", [data.__dict__ for data in filtered_data])
 
         if sum(filtered_results.values()):
             return_string += "Filtered results: "
             error_list_str = []
             if filtered_results["SensorStream"]:
-                error_list_str.append(
-                    f"{filtered_results['SensorStream']}"
-                    " critical sensor alerts")
+                error_list_str.append(f"{filtered_results['SensorStream']}"
+                                      " critical sensor alerts")
             if filtered_results["TransactionStream"]:
                 error_list_str.append(
                     f"{filtered_results['TransactionStream']}"
                     " large transaction")
             if filtered_results["EventStream"]:
-                error_list_str.append(
-                    f"{filtered_results['EventStream']} errors detected")
+                error_list_str.append(f"{filtered_results['EventStream']}"
+                                      " errors detected")
             if filtered_results["Other"]:
                 error_list_str.append(f"{filtered_results['Other']}"
                                       " other high-priority items")
@@ -609,10 +630,9 @@ def data_stream() -> None:
         EventType("git status"),
         TransactionType("sell", 1500),
         SensorType("humidity", 95),
-        EventType("logout")
+        EventType("logout"),
+        OtherType("high-priority")
     ]))
-
-    # OtherType("high-priority")
 
     print()
 

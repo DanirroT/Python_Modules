@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 
 class Plant():
-    """Class to Manage Plants. Has name, height(in cm) and age_days as inbuilt
-variables."""
+    """
+    Class to Manage Plants. Has name, height(in cm) and age_days as inbuilt
+    variables.
+    """
     name: str
     height: int
     age_days: int
 
     def __init__(self, name: str, height: int, age_days: int) -> None:
-        """Plant Class Initialisation function. Takes and sets
-name, height(in cm) and age_days."""
+        """
+        Plant Class Initialisation function. Takes and sets
+        name, height(in cm) and age_days.
+        """
         self.name = name
         self.height = height
         self.age_days = age_days
@@ -17,8 +21,10 @@ name, height(in cm) and age_days."""
 
 
 def ft_plant_factory() -> None:
-    """Introduction to Garden Data Management Streamlining. Uses
-the Plant Class to create plant profiles. After, Prints the information."""
+    """
+    Introduction to Garden Data Management Streamlining. Uses
+    the Plant Class to create plant profiles. After, Prints the information.
+    """
     print("=== Plant Factory Output ===")
 
     plants: list[Plant] = []

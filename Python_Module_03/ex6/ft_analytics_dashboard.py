@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 
 class Player():
-    """
-    Class to Manage Players. Has name, kill_count, level and
-    achivements as inbuilt variables.
-    """
+
     name: str
     location: str
     kill_count: int
@@ -16,12 +13,6 @@ class Player():
     def __init__(self, name: str, location: str,
                  kill_count: int, score: int, level: int,
                  active: bool) -> None:
-        """
-        Plant Class Initialisation function. Takes and sets
-        name, kill_count, level. sets achivements to empty set.
-        if any acivements are detected based on level or killcount, adds them
-        to the achivements set.
-        """
 
         if not name or name == "":
             raise ValueError("Player name cannot be empty.")
@@ -94,7 +85,6 @@ def dict_comprehension(player_list: list[Player]) -> None:
     score_brackets = {"high": 0, "medium": 0, "low": 0}
 
     for player in player_list:
-        print(player.score)
         if player.score > 2500:
             score_brackets["high"] += 1
 

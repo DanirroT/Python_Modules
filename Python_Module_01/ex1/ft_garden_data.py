@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 
 class Plant():
-    """Class to Manage Plants. Has name, height(in cm) and age_days as inbuilt
-variables."""
+    """
+    Class to Manage Plants. Has name, height(in cm) and age_days as inbuilt
+    variables.
+    """
     name: str
     height: int
     age_days: int
 
 
 def ft_garden_data() -> None:
-    """Introduction to Garden Data Management. Uses the Plant Class to create
-plant profiles. After, Prints the information."""
+    """
+    Introduction to Garden Data Management. Uses the Plant Class to create
+    plant profiles. After, Prints the information.
+    """
     print("=== Garden Plant Registry ===")
     plant_1 = Plant()
     plant_2 = Plant()

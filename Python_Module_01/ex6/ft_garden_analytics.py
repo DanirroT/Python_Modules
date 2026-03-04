@@ -8,8 +8,10 @@ variables."""
     age_d: int
 
     def __init__(self, name: str, height: int, age_d: int) -> None:
-        """Plant Class Initialisation function. Takes and sets
-name, height(in cm) and age_d."""
+        """
+        Plant Class Initialisation function. Takes and sets
+    name, height(in cm) and age_d.
+    """
         self.name = name
         self.height = height
         self.age_d = age_d
@@ -20,8 +22,10 @@ name, height(in cm) and age_d."""
 
 
 class FloweringPlant(Plant):
-    """Class to Manage Flowing Plants Derived from the Plant Class.
-Has name, height(in cm), age_d, color and blooming as inbuilt variables."""
+    """
+    Class to Manage Flowing Plants Derived from the Plant Class.
+    Has name, height(in cm), age_d, color and blooming as inbuilt variables.
+    """
     color: str
     blooming: bool
 
@@ -32,8 +36,10 @@ Has name, height(in cm), age_d, color and blooming as inbuilt variables."""
                  color: str,
                  blooming: bool = True
                  ) -> None:
-        """Flower Class Initialisation function. Takes and sets
-name, height(in cm), age_d, color and blooming. Prints when finnished."""
+        """
+        Flower Class Initialisation function. Takes and sets name,
+        height(in cm), age_d, color and blooming. Prints when finnished.
+        """
         super().__init__(name, height, age_d)
         self.color = color
         self.blooming = blooming
@@ -50,8 +56,9 @@ name, height(in cm), age_d, color and blooming. Prints when finnished."""
 
 class PrizeFlower(FloweringPlant):
     """Class to Manage Prized Flowers Derived from the FloweringPlant Class.
-Has name, height(in cm), age_d, color, blooming and prize_points as inbuilt
-variables."""
+    Has name, height(in cm), age_d, color, blooming and prize_points as inbuilt
+    variables.
+    """
     prize_points: int
 
     def __init__(self,

@@ -97,12 +97,14 @@ def ft_data_stream() -> None:
         if event_action not in event_count:
             event_count[event_action] = 0
         event_count[event_action] += 1
-        if i_event < 4:
+        skip_after = 3
+        if i_event < skip_after + 1:
             agent_level_str = f"(level {agent_level})"
             event_description = " ".join(("Player", agent_name,
                                           agent_level_str, event_action))
             print(f"Event {i_event}: {event_description}")
-    print("...")
+    if n_events >= skip_after:
+        print("...")
     print()
     print("=== Stream Analytics ===")
     print(f"Total events processed: {sum(event_count.values())}")

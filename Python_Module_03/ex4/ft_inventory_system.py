@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 
+import sys
+
+
 class InventoryMaster():
     """
     Class to Manage Inventory. Conteins only inventory as inbuilt variable.
@@ -9,11 +12,7 @@ class InventoryMaster():
     inventory: dict[str, int]
 
     def __init__(self, inventory: dict[str, int] = {}) -> None:
-        """
-        Plant Class Initialisation function. Takes and sets
-        name, kill_count, level. sets achivements to empty set.
-        if any acivements are detected based on level or killcount, adds them
-        to the achivements set."""
+
         self.inventory = inventory.copy()
 
     def add_items(self, items: dict[str, int]) -> None:
@@ -101,12 +100,49 @@ class InventoryMaster():
 
 
 def ft_inventory_system() -> None:
-    inventory_manager = InventoryMaster({
-            "sword": 1,
-            "potion": 5,
-            "shield": 2,
-            "armor": 3,
-            "helmet": 1})
+
+    args = sys.argv[1:]
+    if len(args) == 0:
+        print("Inventory is Empty")
+        return
+
+    inventory_split: list[tuple[str, int]] = []
+
+    for arg in args:
+        arg_split = arg.strip().split(":")
+        if len(arg_split) != 2:
+            print(f"\"{arg}\" is not a valid entry. skipping")
+            continue
+        if not arg_split[0]:
+            print(f"\"{arg}\" is not a valid entry. skipping")
+            continue
+        if not arg_split[1]:
+            print(f"\"{arg}\" is not a valid entry. skipping")
+            continue
+        out_1 = arg_split[0]
+        try:
+            out_2 = int(arg_split[1])
+        except ValueError:
+            print(f"\"{arg_split[1]}\" is not a number. skipping")
+            continue
+        if out_2 < 0:
+            print(f"\"{arg_split[1]}\" must be a positive number. skipping")
+            continue
+
+        inventory_split.append((out_1, out_2))
+
+    inventory_dict: dict[str, int] = {k: v for k, v in inventory_split}
+
+    inventory_manager = InventoryMaster(inventory_dict)
+
+    # sword:1 potion:5 shield:2 armor:3 helmet:1
+
+    # inventory_manager = InventoryMaster({
+    #         "sword": 1,
+    #         "potion": 5,
+    #         "shield": 2,
+    #         "armor": 3,
+    #         "helmet": 1})
 
     inventory_manager.ft_analyze_inventory()
     print()

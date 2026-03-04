@@ -3,18 +3,14 @@
 class Player():
     """
     Class to Manage Players. Has name, kill_count, level and
-    achivements as inbuilt variables."""
+    achivements as inbuilt variables.
+    """
     name: str
     kill_count: int
     level: int
     achivements: set[str]
 
     def __init__(self, name: str, kill_count: int, level: int) -> None:
-        """
-        Plant Class Initialisation function. Takes and sets
-        name, kill_count, level. sets achivements to empty set.
-        if any acivements are detected based on level or killcount, adds them
-        to the achivements set."""
 
         if not name or name == "":
             raise ValueError("Player name cannot be empty.")

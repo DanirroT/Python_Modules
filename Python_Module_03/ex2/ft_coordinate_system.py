@@ -12,14 +12,14 @@ def ft_calc_distance(start: tuple[float, float, float] | None,
 
 
 def ft_parse_coordinates(coord_str: str
-                         ) -> tuple[int, int, int] | None:
-    """Parse a string of the format 'x,y,z' into a tuple of integers."""
+                         ) -> tuple[float, float, float] | None:
+    """Parse a string of the format 'x,y,z' into a tuple of floats."""
     try:
         split_coords = coord_str.split(",")
         x_str, y_str, z_str = split_coords
-        x = int(x_str.strip())
-        y = int(y_str.strip())
-        z = int(z_str.strip())
+        x = float(x_str.strip())
+        y = float(y_str.strip())
+        z = float(z_str.strip())
         print("Parsed position:", coord_str)
         return (x, y, z)
     except ValueError as e:

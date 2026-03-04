@@ -1,40 +1,50 @@
 #!/usr/bin/env python3
 
 class Plant():
-    """Class to Manage Plants. Has name, height(in cm) and age_days as inbuilt
-variables."""
+    """
+    Class to Manage Plants. Has name, height(in cm) and age_days as inbuilt
+    variables.
+    """
     name: str
     height: int
     age_days: int
 
     def __init__(self, name: str, height: int, age_days: int) -> None:
-        """Plant Class Initialisation function. Takes and sets
-name, height(in cm) and age_days."""
+        """
+        Plant Class Initialisation function. Takes and sets
+        name, height(in cm) and age_days.
+        """
         self.name = name
         self.height = height
         self.age_days = age_days
 
     def grow(self) -> None:
-        """Function that allows for a called upon Plant to grow.
-All Plants grow at a rate of 1 cm per call."""
+        """
+        Function that allows for a called upon Plant to grow.
+        All Plants grow at a rate of 1 cm per call.
+        """
         self.height += 1
 
     def age(self) -> None:
-        """Function that allows for a called upon Plant to age.
-All Plants age at a rate of 1 day per call. Every day they also grow 1 cm."""
+        """
+        Function that allows for a called upon Plant to age. All Plants age
+        at a rate of 1 day per call. Every day they also grow 1 cm.
+        """
         self.age_days += 1
         self.grow()
 
     def get_info(self) -> str:
         """Function that returns a String with formatted informations
-about the Called upon Plant"""
+        about the Called upon Plant"""
         return f"{self.name}: {self.height}cm, {self.age_days} days old"
 
 
 def ft_plant_growth() -> None:
-    """Introduction to Garden Data Manipulation. Uses the Plant Class to create
-a plant profile. After, simulates the plant aging and rowing for a week.
-Also prints some imformation before and after"""
+    """
+    Introduction to Garden Data Manipulation. Uses the Plant Class to create
+    a plant profile. After, simulates the plant aging and rowing for a week.
+    Also prints some imformation before and after
+    """
     plant = Plant("Rose", 25, 30)
 
     days_loop = 7
