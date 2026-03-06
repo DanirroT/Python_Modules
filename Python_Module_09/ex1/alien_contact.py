@@ -74,7 +74,7 @@ class AlienContact():
 
     @staticmethod
     def str_len_check(field_input: str, min: int, max: int) -> str:
-        if not field_input or field_input == "":
+        if not field_input:
             raise ValueError("Input cannot be empty.")
         if len(field_input) < min:
             raise ValueError(

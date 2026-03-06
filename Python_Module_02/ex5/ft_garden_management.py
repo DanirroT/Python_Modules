@@ -25,7 +25,7 @@ variables."""
     def __init__(self, name: str, water: int, sunlight: int) -> None:
         """Plant Class Initialisation function. Takes and sets
 name, height(in cm) and age_days."""
-        if name == "":
+        if not name:
             raise ValueError("Plant name cannot be empty!")
         self.plant_name = name
         self.water_level = water
@@ -78,7 +78,7 @@ name, height(in cm) and age_d."""
     def check_plant_health(self) -> None:
         for plant in self.plant_list:
             try:
-                if plant.plant_name == "":
+                if not plant.plant_name:
                     raise ValueError("Plant name cannot be empty!")
                 if 0 > plant.water_level:
                     raise WaterError(f"Water level {plant.water_level}"

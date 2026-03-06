@@ -13,11 +13,11 @@ class Card(ABC):
 
         super().__init__(**kwargs)
 
-        if not name or name == "":
+        if not name:
             raise ValueError("Card name cannot be empty.")
         self.name = name
 
-        if not rarity or rarity == "":
+        if not rarity:
             raise ValueError("Card rarity cannot be empty.")
         self.rarity = rarity
 

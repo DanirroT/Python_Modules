@@ -41,7 +41,7 @@ class Combatable(ABC):
             raise ValueError("Card health must be positive.")
         self.health = health
 
-        if not combat_type or combat_type == "":
+        if not combat_type:
             raise ValueError("Card combat type cannot be empty.")
         self.combat_type = combat_type
 

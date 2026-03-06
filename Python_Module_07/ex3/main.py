@@ -29,7 +29,7 @@ class Player():
 
     def __init__(self, name: str):
 
-        if not name or name == "":
+        if not name:
             raise ValueError("Player name cannot be empty.")
         self.name = name
 

@@ -12,13 +12,13 @@ class SensorStream():
 
     def __init__(self, name: str, stream_id: str, data_type: str) -> None:
 
-        if not name or name == "":
+        if not name:
             raise ValueError("Stream name cannot be empty.")
         self.name = name
-        if not stream_id or stream_id == "":
+        if not stream_id:
             raise ValueError("Stream ID cannot be empty.")
         self.stream_id = stream_id
-        if not data_type or data_type == "":
+        if not data_type:
             raise ValueError("Stream Type cannot be empty.")
         self.data_type = data_type
 
@@ -41,7 +41,7 @@ class SensorStream():
 
             print("val name and val:", val_name, val_str)
 
-            if not val_name or val_name == "":
+            if not val_name:
                 raise ValueError("Stream value name cannot be empty.")
             if isinstance(val_str, (int, float)):
                 val = val_str

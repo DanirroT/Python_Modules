@@ -14,7 +14,7 @@ class SpellCard(Card):
 
         self.type = "Spell"
 
-        if not effect_type or effect_type == "":
+        if not effect_type:
             raise ValueError("Card effect type cannot be empty.")
         self.effect_type = effect_type
 

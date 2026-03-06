@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional, Type, Union
+from typing import List, Dict, Type, Any, Optional, Union
 
 
 class DataType(ABC):
@@ -15,15 +15,19 @@ class DataStream(ABC):
     data_type: str
     data: Any
 
+    type_str: str
+    name_str: str
+    error_msg: str
+
     def __init__(self, name: str, stream_id: str, data_type: str) -> None:
 
-        if not name or name == "":
+        if not name:
             raise ValueError("Stream name cannot be empty.")
         self.name = name
-        if not stream_id or stream_id == "":
+        if not stream_id:
             raise ValueError("Stream ID cannot be empty.")
         self.stream_id = stream_id
-        if not data_type or data_type == "":
+        if not data_type:
             raise ValueError("Stream Type cannot be empty.")
         self.data_type = data_type
 
@@ -63,7 +67,7 @@ class DataStream(ABC):
 
                 val_name, val_str = next(iter(simple_dict.items()))
 
-                if not val_name or val_name == "":
+                if not val_name:
                     raise ValueError("Stream value name cannot be empty.")
                 if isinstance(val_str, (int, float)):
                     val = val_str
@@ -90,8 +94,8 @@ class DataStream(ABC):
         if not criteria:
             return data_batch
         if isinstance(data_batch[0], DataType):
-            return [data for data in data_batch
-                    if criteria in str(data.__dict__)]
+            return ([data for data in data_batch
+                    if criteria in str(data.__dict__.values())])
         return [data for data in data_batch if criteria in str(data)]
 
     def get_stats(self) -> Dict[str, Union[str, int, float]]:
@@ -123,6 +127,9 @@ class SensorStream(DataStream):
 
     def __init__(self, name: str, stream_id: str, data_type: str) -> None:
         super().__init__(name, stream_id, data_type)
+        self.type_str = "Sensor"
+        self.name_str = "readings processed"
+        self.error_msg = "ritical sensor alerts"
 
     def process_batch(self, data_batch: List[SensorType]) -> str:
 
@@ -136,7 +143,7 @@ class SensorStream(DataStream):
         data_dict: dict[str, list[int | float]] = {}
         for data_point in data_batch:
 
-            if not data_point.label or data_point.label == "":
+            if not data_point.label:
                 raise ValueError("Stream value name cannot be empty.")
             if isinstance(data_point.value, (int, float)):
                 val = data_point.value
@@ -160,7 +167,7 @@ class SensorStream(DataStream):
         unit = ""
         lookup_stat = "avg"
         lookup_stat_name = "temp"
-        output_data = stats["temp" + "_" + lookup_stat]
+        output_data = stats.get(lookup_stat_name + "_" + lookup_stat)
         if lookup_stat == "avg":
             unit = self.unit(lookup_stat_name)
 
@@ -190,7 +197,8 @@ class SensorStream(DataStream):
                     if data.value > 50:
                         return_list.append(data)
             return return_list
-        return [data for data in data_batch if criteria in str(data.__dict__)]
+        return ([data for data in data_batch
+                if criteria in str(data.__dict__.values())])
 
     def get_stats(self) -> dict[str, str | int | float]:
 
@@ -234,8 +242,16 @@ class TransactionType(DataType):
 
 class TransactionStream(DataStream):
 
+    type_str: str
+    name_str: str
+    error_msg: str
+
     def __init__(self, name: str, stream_id: str, data_type: str) -> None:
         super().__init__(name, stream_id, data_type)
+
+        self.type_str = "Transaction"
+        self.name_str = "operations processed"
+        self.error_msg = "large transaction"
 
     def process_batch(self, data_batch: List[TransactionType]
                       ) -> str:
@@ -250,7 +266,7 @@ class TransactionStream(DataStream):
         data_dict: dict[str, list[int | float]] = {}
         for data_point in data_batch:
 
-            if not data_point.label or data_point.label == "":
+            if not data_point.label:
                 raise ValueError("Stream value name cannot be empty.")
             if isinstance(data_point.value, (int, float)):
                 val = data_point.value
@@ -285,7 +301,8 @@ class TransactionStream(DataStream):
             return data_batch
         if criteria == "high-priority":
             return [data for data in data_batch if data.value > 1000]
-        return [data for data in data_batch if criteria in str(data.__dict__)]
+        return [data for data in data_batch
+                if criteria in str(data.__dict__.values())]
 
     def get_stats(self) -> dict[str, str | int | float]:
 
@@ -326,6 +343,10 @@ class EventStream(DataStream):
     def __init__(self, name: str, stream_id: str, data_type: str) -> None:
         super().__init__(name, stream_id, data_type)
 
+        self.type_str = "Event"
+        self.name_str = "events processed"
+        self.error_msg = "errors detected"
+
     def process_batch(self, data_batch: List[EventType]) -> str:
 
         formatted_input = ", ".join(data.event for data in data_batch)
@@ -337,7 +358,7 @@ class EventStream(DataStream):
         data_list: list[str] = []
         for data_point in data_batch:
 
-            if not data_point.event or data_point.event == "":
+            if not data_point.event:
                 raise ValueError("Stream value cannot be empty.")
             if isinstance(data_point.event, str):
                 val = data_point.event
@@ -371,7 +392,8 @@ class EventStream(DataStream):
         if criteria == "high-priority":
             return [data for data in data_batch
                     if "error" in str(data.event).lower()]
-        return [data for data in data_batch if criteria in str(data.__dict__)]
+        return [data for data in data_batch
+                if criteria in str(data.__dict__.values())]
 
     def get_stats(self) -> Dict[str, Union[str, int, float]]:
 
@@ -382,11 +404,11 @@ class EventStream(DataStream):
         output_dict["logout"] = 0
         for message in self.data:
             message_low = message.lower()
-            if not output_dict[message_low]:
+            if message_low not in output_dict.keys():
                 output_dict[message_low] = 0
             output_dict[message_low] += 1
 
-            if "error" in message_low and "error" not in message_low:
+            if "error" in message_low and message_low not in "error":
                 output_dict["error"] += 1
 
             if (("login" in message_low or "logged in" in message_low)
@@ -415,99 +437,93 @@ class OtherType(DataType):
         self.other = other
 
 
+class OtherStream(DataStream):
+
+    def __init__(self, name: str, stream_id: str, data_type: str) -> None:
+        super().__init__(name, stream_id, data_type)
+
+    type_str = "Other"
+    name_str = "items processed"
+    error_msg = "other high-priority items present"
+
+    def process_batch(self, data_batch: List[Any]) -> str:
+        return super().process_batch(data_batch)
+
+
 class StreamProcessor():
 
     name: str
     batch_num: int
-    stream_list: dict[Type, Type]
+    streams: dict[Type[DataType], DataStream]
 
     def __init__(self, name: str) -> None:
 
-        if not name or name == "":
+        if not name:
             raise ValueError("Stream name cannot be empty.")
         self.name = name
 
         self.batch_num = 0
-        self.stream_list = {SensorStream: SensorType,
-                            TransactionStream: TransactionType,
-                            EventStream: EventType}
+        self.streams = {
+            SensorType: SensorStream("ProssSensor", "S01", "env"),
+            TransactionType: TransactionStream("ProssTrans", "T01", "fin"),
+            EventType: EventStream("ProssEvent", "E01", "sys"),
+            DataType: OtherStream("ProssOther", "O01", "any"),
+        }
 
     def process_all_batches(self, batches: List[DataType]) -> str:
 
         self.batch_num += 1
         return_string = f"Batch {self.batch_num} Results:"
 
-        processed_dict: dict[str, int] = {stream_type.__name__: 0
-                                          for stream_type in self.stream_list}
-        processed_dict["Other"] = 0
+        grouped: dict[DataStream, list[Any]] = {
+            stream: [] for stream in self.streams.values()}
+
+        fallback_stream = self.streams[DataType]
 
         for data in batches:
             found = False
-            for data_stream, data_types in self.stream_list.items():
-                if data.__class__ == data_types:
+            for data_type, stream in self.streams.items():
+                if isinstance(data, data_type):
+                    grouped[stream].append(data)
                     found = True
-                    processed_dict[data_stream.__name__] += 1
-
                     break
             if not found:
-                processed_dict["Other"] += 1
+                grouped[fallback_stream].append(data)
 
-        if processed_dict["SensorStream"]:
-            return_string += (
-                f"\n- Sensor data: {processed_dict['SensorStream']}"
-                " readings processed")
-        if processed_dict["TransactionStream"]:
-            return_string += (
-                f"\n- Transaction data: {processed_dict['TransactionStream']}"
-                " operations processed")
-        if processed_dict["EventStream"]:
-            return_string += (
-                f"\n- Event data: {processed_dict['EventStream']}"
-                " events processed")
-        if processed_dict["Other"]:
-            return_string += (
-                f"\n- Other data: {processed_dict['Other']}"
-                " items processed")
+        for stream in self.streams.values():
+
+            grouped_len = len(grouped[stream])
+
+            if grouped_len > 0:
+                return_string += (
+                    f"\n- {stream.type_str} data: {grouped_len}"
+                    f" {stream.name_str}")
 
         return_string += ("\n\nStream filtering active: "
                           "High-priority data only\n")
 
-        filtered_results: dict[str, int] = {
-            stream_type.__name__: 0 for stream_type in self.stream_list}
-        filtered_results["Other"] = 0
+        filtered_results: dict[DataStream, List[Any]] = {}
 
-        for data in batches:
-            found = False
-            for data_stream, data_type in self.stream_list.items():
-                if data.__class__ == data_type:
-                    found = True
-                    filtered_data = data_stream.filter_data(
-                        self, data_batch=[data], criteria="high-priority")
-                    filtered_results[data_stream.__name__] += len(
-                        filtered_data)
-                    break
-            if not found:
-                filtered_data = DataStream.filter_data(
-                    self, data_batch=[data], criteria="high-priority")
-                filtered_results["Other"] += 1
+        total_filtered_num = 0
 
-        if sum(filtered_results.values()):
+        for stream, batch in grouped.items():
+            if batch:
+                filtered_results[stream] = stream.filter_data(
+                    batch, criteria="high-priority")
+                total_filtered_num += len(filtered_results[stream])
+
+        if total_filtered_num:
             return_string += "Filtered results: "
             error_list_str = []
-            if filtered_results["SensorStream"]:
-                error_list_str.append(
-                    f"{filtered_results['SensorStream']}"
-                    " critical sensor alerts")
-            if filtered_results["TransactionStream"]:
-                error_list_str.append(
-                    f"{filtered_results['TransactionStream']}"
-                    " large transaction")
-            if filtered_results["EventStream"]:
-                error_list_str.append(
-                    f"{filtered_results['EventStream']} errors detected")
-            if filtered_results["Other"]:
-                error_list_str.append(f"{filtered_results['Other']}"
-                                      " other high-priority items")
+
+            for stream, filtered in filtered_results.items():
+
+                filter_len = len(filtered)
+
+                if filter_len > 0:
+                    error_list_str.append(
+                        f"{filter_len} {stream.error_msg}")
+
             return_string += ", ".join(error_list_str)
         else:
             return_string += "No High-priority data"
@@ -521,76 +537,76 @@ def data_stream() -> None:
 
     print()
 
-    # print("Initializing Sensor Stream...")
+    print("Initializing Sensor Stream...")
 
-    # Sensor = SensorStream("Sensor", "SENSOR_001", "Environmental Data")
+    Sensor = SensorStream("Sensor", "SENSOR_001", "Environmental Data")
 
-    # print(Sensor.process_batch([
-    #     SensorType("temp", 22.5),  # °C
-    #     SensorType("humidity", 65),  # %
-    #     SensorType("pressure", 1013)  # hPa
-    # ]))
+    print(Sensor.process_batch([
+        SensorType("temp", 22.5),  # °C
+        SensorType("humidity", 65),  # %
+        SensorType("pressure", 1013)  # hPa
+    ]))
 
-    # print()
+    print()
 
-    # """
-    # Sensor_filtered = Sensor.filter_data([
-    #     SensorType("temp", 50),  # °C
-    #     SensorType("humidity", 65),  # %
-    #     SensorType("pressure", 1013)  # hPa
-    #     ], "high-priority")
+    """
+    Sensor_filtered = Sensor.filter_data([
+        SensorType("temp", 50),  # °C
+        SensorType("humidity", 65),  # %
+        SensorType("pressure", 1013)  # hPa
+        ], "high-priority")
 
-    # print([data.__dict__ for data in Sensor_filtered])
-    # """
+    print([data.__dict__.values() for data in Sensor_filtered])
 
-    # print()
+    print()
+    """
 
-    # print("Initializing Transaction Stream...")
+    print("Initializing Transaction Stream...")
 
-    # Transaction = TransactionStream("Transaction", "TRANS_001",
-    #                                 "Financial Data")
+    Transaction = TransactionStream("Transaction", "TRANS_001",
+                                    "Financial Data")
 
-    # print(Transaction.process_batch([
-    #     TransactionType("buy", 100),
-    #     TransactionType("sell", 150),
-    #     TransactionType("buy", 75)
-    # ]))
+    print(Transaction.process_batch([
+        TransactionType("buy", 100),
+        TransactionType("sell", 150),
+        TransactionType("buy", 75)
+    ]))
 
-    # print()
+    print()
 
-    # """
-    # Transaction_filtered = Transaction.filter_data([
-    #     TransactionType("buy", 100),
-    #     TransactionType("sell", 10000),
-    #     TransactionType("buy", 75)], "high-priority")
+    """
+    Transaction_filtered = Transaction.filter_data([
+        TransactionType("buy", 100),
+        TransactionType("sell", 10000),
+        TransactionType("buy", 75)], "high-priority")
 
-    # print([data.__dict__ for data in Transaction_filtered])
-    # """
+    print([data.__dict__.values() for data in Transaction_filtered])
 
-    # print()
+    print()
+    """
 
-    # print("Initializing Event Stream...")
+    print("Initializing Event Stream...")
 
-    # Event = EventStream("Event", "EVENT_001", "System Events")
+    Event = EventStream("Event", "EVENT_001", "System Events")
 
-    # print(Event.process_batch([
-    #     EventType("login"),
-    #     EventType("error"),
-    #     EventType("logout")
-    # ]))
+    print(Event.process_batch([
+        EventType("login"),
+        EventType("error"),
+        EventType("logout")
+    ]))
 
-    # print()
+    print()
 
-    # """
-    # Event_filtered = Event.filter_data([
-    #     EventType("login"),
-    #     EventType("error"),
-    #     EventType("logout")], "high-priority")
+    """
+    Event_filtered = Event.filter_data([
+        EventType("login"),
+        EventType("error"),
+        EventType("logout")], "high-priority")
 
-    # print([data.__dict__ for data in Event_filtered])
-    # """
+    print([data.__dict__.values() for data in Event_filtered])
 
-    # print()
+    print()
+    """
 
     print("=== Polymorphic Stream Processing ===")
 
@@ -612,7 +628,7 @@ def data_stream() -> None:
         EventType("logout")
     ]))
 
-    # OtherType("high-priority")
+    #     OtherType("high-priority"),
 
     print()
 

@@ -5,7 +5,7 @@ def check_plant_health(plant_name: str,
                        sunlight_hour: int
                        ) -> None:
     try:
-        if plant_name == "":
+        if not plant_name:
             raise ValueError("Plant name cannot be empty!")
         if 0 > water_level:
             raise ValueError(f"Water level {water_level} is too low (min 0)")

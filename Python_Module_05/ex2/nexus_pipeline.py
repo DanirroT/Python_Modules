@@ -2,40 +2,48 @@
 
 from abc import ABC, abstractmethod
 import collections
-from typing import List, Dict, Any, Optional, Type, Union  # noqa: F401
+from typing import Any, Type, Union, Protocol  # noqa: F401
 
 
 class InputStage():
     def process(self, data: Any) -> dict:
-        pass
+        out_dict = {}
+        return out_dict
 
 
 class TransformStage():
     def process(self, data: Any) -> dict:
-        pass
+        out_dict = {}
+        return out_dict
 
 
 class OutputStage():
     def process(self, data: Any) -> str:
+        out_str = ""
+        return out_str
+
+
+class ProcessingStage(Protocol):
+    def process(self, data: Any) -> Any:
         pass
-
-
-class ProcessingStage(ProcessingPipeline):
-    pass
 
 
 class ProcessingPipeline(ABC):
 
-    stages: List[Stage]
+    stages: list[ProcessingStage]
 
     @abstractmethod
     def add_stage(self, stage: ProcessingStage) -> None:
-        self.stages
-        pass
+        self.stages = [InputStage(), TransformStage(), OutputStage()]
 
     @abstractmethod
     def process(self, data: Any) -> Any:
-        pass
+        in_loop = data
+        for stage in self.stages:
+            out_loop = stage.process(in_loop)
+            # validate?
+            in_loop = out_loop
+        return out_loop
 
 
 class JSONAdapter(ProcessingPipeline):
@@ -73,7 +81,7 @@ class StreamAdapter(ProcessingPipeline):
 
 class NexusManager():
 
-    stages: List[Pipeline]
+    stages: list[Pipeline]
 
     def __init__(self) -> None:
         print("Pipeline capacity: 1000 streams/second")

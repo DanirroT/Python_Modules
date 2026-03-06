@@ -17,13 +17,13 @@ class DataStream(ABC):
 
     def __init__(self, name: str, stream_id: str, data_type: str) -> None:
 
-        if not name or name == "":
+        if not name:
             raise ValueError("Stream name cannot be empty.")
         self.name = name
-        if not stream_id or stream_id == "":
+        if not stream_id:
             raise ValueError("Stream ID cannot be empty.")
         self.stream_id = stream_id
-        if not data_type or data_type == "":
+        if not data_type:
             raise ValueError("Stream Type cannot be empty.")
         self.data_type = data_type
 
@@ -63,7 +63,7 @@ class DataStream(ABC):
 
                 val_name, val_str = next(iter(simple_dict.items()))
 
-                if not val_name or val_name == "":
+                if not val_name:
                     raise ValueError("Stream value name cannot be empty.")
                 if isinstance(val_str, (int, float)):
                     val = val_str
@@ -226,7 +226,7 @@ class TransactionStream(DataStream):
 
             val_name, val_str = next(iter(simple_dict.items()))
 
-            if not val_name or val_name == "":
+            if not val_name:
                 raise ValueError("Stream value name cannot be empty.")
             if isinstance(val_str, (int, float)):
                 val = val_str
@@ -305,7 +305,7 @@ class EventStream(DataStream):
         data_list: list[str] = []
         for inp in data_batch:
 
-            if not inp or inp == "":
+            if not inp:
                 raise ValueError("Stream value cannot be empty.")
             if isinstance(inp, str):
                 val = inp
@@ -377,7 +377,7 @@ class StreamProcessor():
 
     def __init__(self, name: str, stream_list: List[DataStream]) -> None:
 
-        if not name or name == "":
+        if not name:
             raise ValueError("Stream name cannot be empty.")
         self.name = name
 

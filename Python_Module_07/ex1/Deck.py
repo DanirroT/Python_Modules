@@ -10,7 +10,7 @@ class Deck():
 
     def __init__(self, name: str) -> None:
 
-        if not name or name == "":
+        if not name:
             raise ValueError("Card name cannot be empty.")
         self.name = name
         self.card_list = []

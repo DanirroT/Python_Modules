@@ -12,7 +12,7 @@ class Player():
 
     def __init__(self, name: str, kill_count: int, level: int) -> None:
 
-        if not name or name == "":
+        if not name:
             raise ValueError("Player name cannot be empty.")
         self.name = name
         self.kill_count = int(kill_count)

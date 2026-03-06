@@ -17,13 +17,13 @@ class DataStream(ABC):
 
     def __init__(self, name: str, stream_id: str, data_type: str) -> None:
 
-        if not name or name == "":
+        if not name:
             raise ValueError("Stream name cannot be empty.")
         self.name = name
-        if not stream_id or stream_id == "":
+        if not stream_id:
             raise ValueError("Stream ID cannot be empty.")
         self.stream_id = stream_id
-        if not data_type or data_type == "":
+        if not data_type:
             raise ValueError("Stream Type cannot be empty.")
         self.data_type = data_type
 
@@ -63,7 +63,7 @@ class DataStream(ABC):
 
                 val_name, val_str = next(iter(simple_dict.items()))
 
-                if not val_name or val_name == "":
+                if not val_name:
                     raise ValueError("Stream value name cannot be empty.")
                 if isinstance(val_str, (int, float)):
                     val = val_str
@@ -90,8 +90,8 @@ class DataStream(ABC):
         if not criteria:
             return data_batch
         if isinstance(data_batch[0], DataType):
-            return [data for data in data_batch
-                    if criteria in str(data.__dict__)]
+            return ([data for data in data_batch
+                    if criteria in str(data.__dict__.values())])
         return [data for data in data_batch if criteria in str(data)]
 
     def get_stats(self) -> Dict[str, Union[str, int, float]]:
@@ -136,7 +136,7 @@ class SensorStream(DataStream):
         data_dict: dict[str, list[int | float]] = {}
         for data_point in data_batch:
 
-            if not data_point.label or data_point.label == "":
+            if not data_point.label:
                 raise ValueError("Stream value name cannot be empty.")
             if isinstance(data_point.value, (int, float)):
                 val = data_point.value
@@ -191,7 +191,8 @@ class SensorStream(DataStream):
                     if data.value > 50:
                         return_list.append(data)
             return return_list
-        return [data for data in data_batch if criteria in str(data.__dict__)]
+        return ([data for data in data_batch
+                    if criteria in str(data.__dict__.values())])
 
     def get_stats(self) -> dict[str, str | int | float]:
 
@@ -251,7 +252,7 @@ class TransactionStream(DataStream):
         data_dict: dict[str, list[int | float]] = {}
         for data_point in data_batch:
 
-            if not data_point.label or data_point.label == "":
+            if not data_point.label:
                 raise ValueError("Stream value name cannot be empty.")
             if isinstance(data_point.value, (int, float)):
                 val = data_point.value
@@ -287,7 +288,8 @@ class TransactionStream(DataStream):
         if criteria == "high-priority":
             print("\nin transaction!", end=" | ")
             return [data for data in data_batch if data.value > 1000]
-        return [data for data in data_batch if criteria in str(data.__dict__)]
+        return ([data for data in data_batch
+                    if criteria in str(data.__dict__.values())])
 
     def get_stats(self) -> dict[str, str | int | float]:
 
@@ -339,7 +341,7 @@ class EventStream(DataStream):
         data_list: list[str] = []
         for data_point in data_batch:
 
-            if not data_point.event or data_point.event == "":
+            if not data_point.event:
                 raise ValueError("Stream value cannot be empty.")
             if isinstance(data_point.event, str):
                 val = data_point.event
@@ -374,7 +376,8 @@ class EventStream(DataStream):
             print("\nin event!", end=" | ")
             return [data for data in data_batch
                     if "error" in str(data.event).lower()]
-        return [data for data in data_batch if criteria in str(data.__dict__)]
+        return ([data for data in data_batch
+                 if criteria in str(data.__dict__.values())])
 
     def get_stats(self) -> Dict[str, Union[str, int, float]]:
 
@@ -426,7 +429,7 @@ class StreamProcessor():
 
     def __init__(self, name: str) -> None:
 
-        if not name or name == "":
+        if not name:
             raise ValueError("Stream name cannot be empty.")
         self.name = name
 
@@ -493,7 +496,7 @@ class StreamProcessor():
         filtered_results["Other"] = 0
 
         for data in batches:
-            print("data:", data.__dict__, end=" | ")
+            print("data:", data.__dict__.values(), end=" | ")
             found = False
             for data_stream, data_type in self.stream_list.items():
                 if data.__class__ == data_type:
@@ -504,14 +507,14 @@ class StreamProcessor():
                         self, data_batch=[data], criteria="high-priority")
                     filtered_results[data_stream.__name__] += len(
                         filtered_data)
-                    print("filtered:", [data.__dict__
+                    print("filtered:", [data.__dict__.values()
                                         for data in filtered_data])
                     break
             if not found:
                 filtered_data = DataStream.filter_data(
                     self, data_batch=[data], criteria="high-priority")
                 filtered_results["Other"] += 1
-                print("filtered:", [data.__dict__ for data in filtered_data])
+                print("filtered:", [data.__dict__.values() for data in filtered_data])
 
         if sum(filtered_results.values()):
             return_string += "Filtered results: "
@@ -561,7 +564,7 @@ def data_stream() -> None:
     #     SensorType("pressure", 1013)  # hPa
     #     ], "high-priority")
 
-    # print([data.__dict__ for data in Sensor_filtered])
+    # print([data.__dict__.values() for data in Sensor_filtered])
     # """
 
     # print()
@@ -585,7 +588,7 @@ def data_stream() -> None:
     #     TransactionType("sell", 10000),
     #     TransactionType("buy", 75)], "high-priority")
 
-    # print([data.__dict__ for data in Transaction_filtered])
+    # print([data.__dict__.values() for data in Transaction_filtered])
     # """
 
     # print()
@@ -608,7 +611,7 @@ def data_stream() -> None:
     #     EventType("error"),
     #     EventType("logout")], "high-priority")
 
-    # print([data.__dict__ for data in Event_filtered])
+    # print([data.__dict__.values() for data in Event_filtered])
     # """
 
     # print()

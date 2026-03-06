@@ -17,7 +17,7 @@ class InventoryMaster():
 
     def add_items(self, items: dict[str, int]) -> None:
         for name in items:
-            if not name or name == "":
+            if not name:
                 raise ValueError("Item name cannot be empty.")
             if name not in self.inventory:
                 self.inventory[name] = 0

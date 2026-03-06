@@ -14,10 +14,10 @@ class Player():
                  kill_count: int, score: int, level: int,
                  active: bool) -> None:
 
-        if not name or name == "":
+        if not name:
             raise ValueError("Player name cannot be empty.")
         self.name = name
-        if not location or location == "":
+        if not location:
             raise ValueError("Player location cannot be empty.")
         self.location = location
         self.score = int(score)

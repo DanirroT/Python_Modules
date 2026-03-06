@@ -66,7 +66,7 @@ class CrewMember():
     @staticmethod
     def str_len_check(field_name: str, field_input: str, min: int, max: int
                       ) -> str:
-        if not field_input or field_input == "":
+        if not field_input:
             raise ValueError(f"{field_name} cannot be empty.")
         if len(field_input) < min:
             raise ValueError(f"{field_name} too short (min={min}).")
@@ -168,7 +168,7 @@ class SpaceMission():
     @staticmethod
     def str_len_check(field_name: str, field_input: str, min: int, max: int
                       ) -> str:
-        if not field_input or field_input == "":
+        if not field_input:
             raise ValueError(f"{field_name} cannot be empty.")
         if len(field_input) < min:
             raise ValueError(f"{field_name} too short (min={min}).")
