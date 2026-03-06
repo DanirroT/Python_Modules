@@ -5,8 +5,9 @@
 
 # import json, csv
 
+from typing import Optional
 from datetime import date
-from pydantic import field
+from pydantic import BaseModel, ValidationError, Field, model_validator
 from enum import Enum
 
 # for this project to work, use:
@@ -22,7 +23,17 @@ class Rank(str, Enum):
     COMANDER = "commander"
 
 
-class CrewMember():
+class CrewMember(BaseModel):
+
+    station_id: str = Field(min_length=3, max_length=10)  # len 3-10
+    name: str = Field(min_length=1, max_length=50)  # len 1-50
+    crew_size: int = Field(ge=1, le=20)  # val 1-20
+    power_level: float = Field(ge=0, le=100)  # val 0.0-100.0 (%)
+    oxygen_level: float = Field(ge=0, le=100)  # val 0.0-100.0 (%)
+    last_maintenance: date = Field()
+    is_operational: bool = Field(default=True)
+    notes: Optional[str] = Field(default=None, max_length=200)  # max_len = 200
+
     member_id: str  # len 3-10
     name: str  # val 2-50
     rank: Rank
@@ -31,6 +42,7 @@ class CrewMember():
     years_experience: int  # val 0-50
     is_active: bool = True
 
+    """
     def __init__(self, member_id: str, name: str, rank: Rank, age: int,
                  specialization: str, years_experience: int,
                  is_active: bool = True) -> None:
@@ -55,72 +67,161 @@ class CrewMember():
             self.is_active = True if is_active else False
 
         except ValueError as e:
-            print(e)
+            print(e)"""
 
-    @staticmethod
-    def str_len_check(field_input: str, min: int, max: int) -> str:
-        if not field_input:
-            raise ValueError("Input cannot be empty.")
-        if len(field_input) < min:
-            raise ValueError(
-                f"Input should be larger than or equal to {min} char")
-        if len(field_input) > max:
-            raise ValueError(
-                f"Input should be smaller than or equal to {max} char")
+def str_error(error_type: str, field: str, msg: str, input_raw: str,
+              expected: int | None) -> None:
 
-        return field_input
+    input_processed = len(input_raw)
 
-    @staticmethod
-    def int_val_check(field_input: int, min: int, max: int) -> int:
-        try:
-            field_int = int(field_input)
-        except ValueError:
-            raise ValueError("Input must be numeric.")
-        if field_int < min:
-            if min == 0:
-                raise ValueError("Input must be positive.")
-            raise ValueError(f"Input should be more than or equal to {min}")
-        if field_int > max:
-            if max == 0:
-                raise ValueError("Input must be negative.")
-            raise ValueError(f"Input should be less than or equal to {max}")
+    if error_type == "string_too_short":
+        if not input_processed:
+            print(f"'{field}' cannot be empty.")
+        else:
+            print(
+                f"'{field}' should be larger than or equal to {expected} char.",
+                  f"Got {input_processed}")
+    elif error_type == "string_too_long":
+        print(
+            f"'{field}' should be smaller than or equal to {expected} char.",
+                  f"Got {input_processed}")
+    else:
+        print("Unknown Error:", msg)
 
-        return field_int
 
-    @staticmethod
-    def float_val_check(field_name: str, field_input: float, min: int, max: int
-                        ) -> float:
-        try:
-            field_float = float(field_input)
-        except ValueError:
-            raise ValueError("Input must be numeric.")
-        if (min == 0 and max == 100
-                and field_float < min and field_float > max):
-            raise ValueError("SpaceStation Oxygen Level be a percentage.")
-        if field_float < min:
-            if min == 0:
-                raise ValueError("Input must be positive.")
-            raise ValueError(f"Input should be more than or equal to {min}")
-        if field_float > max:
-            if max == 0:
-                raise ValueError("Input must be negative.")
-            raise ValueError(f"Input should be less than or equal to {max}")
+def int_error(error_type: str, field: str, msg: str, input_raw: int,
+              expected: int | None) -> None:
 
-        return field_float
+    input_processed = input_raw
+
+    if error_type == "int_parsing":
+        print(f"'{field}' must an intager. Got {input_processed}")
+    elif error_type == "less_than_equal":
+        if expected == 0:
+            print(
+                f"'{field}' must be positive. Got {input_processed}")
+        else:
+            print(
+                f"'{field}' should be less than or equal to {expected}.",
+                  f"Got {input_processed}")
+    elif error_type == "greater_than_equal":
+        if expected == 0:
+            print(
+                f"'{field}' must be negative. Got {input_processed}")
+        else:
+            print(
+                f"'{field}' should be greater than or equal to {expected}.",
+                  f"Got {input_processed}")
+    else:
+        print("Unknown Error:", msg)
+
+
+def float_error(error_type: str, field: str, msg: str, input_raw: float,
+                expected: float | None) -> None:
+
+    input_processed = input_raw
+
+    if error_type == "float_parsing":
+        print(f"'{field}' must an intager. Got {input_processed}")
+    elif error_type == "less_than_equal":
+        if expected == 0:
+            print(
+                f"'{field}' must be positive. Got {input_processed}")
+        else:
+            print(
+                f"'{field}' should be less than or equal to {expected}.",
+                  f"Got {input_processed}")
+    elif error_type == "greater_than_equal":
+        if expected == 0:
+            print(
+                f"'{field}' must be negative. Got {input_processed}")
+        else:
+            print(f"'{field}' should be greater than or equal to {expected}.",
+                  f"Got {input_processed}")
+    else:
+        print("Unknown Error:", msg)
+
+
+#    if (min == 0 and max == 100
+#            and field_float < min and field_float > max):
+#        print("SpaceStation Oxygen Level be a percentage.")
+
+
+def bool_error(error_type: str, field: str, msg: str, input_raw: bool,
+               expected: bool | None) -> None:
+
+    input_processed = input_raw
+
+    if error_type == "bool_parsing":
+        print(f"'{field}' must a valid boolean. Got {input_processed}")
+    else:
+        print("Unknown Error:", msg)
+
+
+def date_error(error_type: str, field: str, msg: str, input_raw: date,
+               expected: str | None) -> None:
+
+    input_processed = input_raw
+
+    if error_type == "date_from_datetime_parsing":
+        print(f"'{field}' must be a valid date. Got {input_processed}")
+    else:
+        print("Unknown Error:", msg)
+
+
+def error_processing(error_details: list[dict[str, Any]]) -> None:
+
+    # print()
+    # print()
+    # print("\n".join(error_details))
+    # print("ALL:", error_details, sep="\n")
+    # print()
+    # print()
+
+    for error in error_details:
+
+        # print()
+        print("corrent:", error)
+        # print()
+
+        error_type = error["type"]
+        field = error["loc"][0]
+        msg = error["msg"]
+        input = error["input"]
+        get_expected = error.get("ctx")
+        print("get expected:", get_expected)
+        expected = (list(get_expected.values())[0]
+                    if get_expected else get_expected)
+
+        print("unpacked:", error_type, field, msg, input, expected)
+        # print()
+
+        if field in ["station_id", "name", "notes"]:
+            str_error(error_type, field, msg, input, expected)
+        elif field in ["crew_size"]:
+            int_error(error_type, field, msg, input, expected)
+        elif field in ["power_level", "oxygen_level"]:
+            float_error(error_type, field, msg, input, expected)
+        elif field in ["last_maintenance"]:
+            date_error(error_type, field, msg, input, expected)
+        elif field in ["is_operational"]:
+            bool_error(error_type, field, msg, input, expected)
+        else:
+            print("Unknown error:", error)
 
 
 class SpaceMission():
     mission_id: str  # len 5-15 characters
     mission_name: str  # len 3-100 characters
     destination: str  # len 3-50 characters
-    launch_date: datetime
+    launch_date: str
     duration_days: int  # int 1-3650 days (max 10 years)
     crew: list[CrewMember]  # len min 1 max 12
     mission_status: str = "planned"
     budget_millions: float  # val 1.0-10000.0 million dollars
 
     def __init__(self, mission_id: str, mission_name: str, destination: str,
-                 launch_date: datetime, duration_days: int,
+                 launch_date: str, duration_days: int,
                  crew: list[CrewMember], budget_millions: float,
                  mission_status: str = "planned") -> None:
 
@@ -151,56 +252,6 @@ class SpaceMission():
 
         except ValueError as e:
             print(e)
-
-    @staticmethod
-    def str_len_check(field_input: str, min: int, max: int) -> str:
-        if not field_input:
-            raise ValueError("Input cannot be empty.")
-        if len(field_input) < min:
-            raise ValueError(
-                f"Input should be larger than or equal to {min} char")
-        if len(field_input) > max:
-            raise ValueError(
-                f"Input should be smaller than or equal to {max} char")
-
-        return field_input
-
-    @staticmethod
-    def int_val_check(field_input: int, min: int, max: int) -> int:
-        try:
-            field_int = int(field_input)
-        except ValueError:
-            raise ValueError("Input must be numeric.")
-        if field_int < min:
-            if min == 0:
-                raise ValueError("Input must be positive.")
-            raise ValueError(f"Input should be more than or equal to {min}")
-        if field_int > max:
-            if max == 0:
-                raise ValueError("Input must be negative.")
-            raise ValueError(f"Input should be less than or equal to {max}")
-
-        return field_int
-
-    @staticmethod
-    def float_val_check(field_input: float, min: int, max: int) -> float:
-        try:
-            field_float = float(field_input)
-        except ValueError:
-            raise ValueError("Input must be numeric.")
-        if (min == 0 and max == 100
-                and field_float < min and field_float > max):
-            raise ValueError("SpaceStation Oxygen Level be a percentage.")
-        if field_float < min:
-            if min == 0:
-                raise ValueError("Input must be positive.")
-            raise ValueError(f"Input should be more than or equal to {min}")
-        if field_float > max:
-            if max == 0:
-                raise ValueError("Input must be negative.")
-            raise ValueError(f"Input should be less than or equal to {max}")
-
-        return field_float
 
     @model_validator
     def validate_inputs(self) -> None:
@@ -253,7 +304,7 @@ if __name__ == "__main__":
 
     space_mission_1 = SpaceMission(
         "M2024_MARS", "Mars Colony Establishment", "Mars",
-        date(2030, 5, 6), 900, [sara, john, alice], 2500)
+        str(date(2030, 5, 6)), 900, [sara, john, alice], 2500)
 
     print("Valid mission created:")
 
@@ -273,6 +324,9 @@ if __name__ == "__main__":
 
     print("Expected validation error:")
 
-    space_station_2 = SpaceMission(
-        "M2024_URANUS", "Uranus Exploration", "Uranus",
-        date.today(), 2000, [alice, frank], 70 - 1)
+    try:
+        space_station_2 = SpaceMission(
+            "M2024_URANUS", "Uranus Exploration", "Uranus",
+            str(date.today()), 2000, [alice, frank], 70 - 1)
+    except ValidationError as e:
+        error_processing(e.errors())

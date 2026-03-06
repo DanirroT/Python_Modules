@@ -118,7 +118,7 @@ class SensorType(DataType):
     label: str
     value: Union[int, float]
 
-    def __init__(self, label, value) -> None:
+    def __init__(self, label: str, value: Union[int, float]) -> None:
         self.label = label
         self.value = value
 
@@ -235,7 +235,7 @@ class TransactionType(DataType):
     label: str
     value: Union[int, float]
 
-    def __init__(self, label, value) -> None:
+    def __init__(self, label: str, value: Union[int, float]) -> None:
         self.label = label
         self.value = value
 
@@ -334,7 +334,7 @@ class EventType(DataType):
 
     event: str
 
-    def __init__(self, event) -> None:
+    def __init__(self, event: str) -> None:
         self.event = event
 
 
@@ -431,9 +431,9 @@ class EventStream(DataStream):
 
 class OtherType(DataType):
 
-    other: str
+    other: Any
 
-    def __init__(self, other) -> None:
+    def __init__(self, other: Any) -> None:
         self.other = other
 
 

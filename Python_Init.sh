@@ -3,6 +3,7 @@
 python3 -m venv .venv
 source .venv/bin/activate
 pip install flake8
+# pip install pydantic
 alias norminette=flake8
 alias python=python3
 

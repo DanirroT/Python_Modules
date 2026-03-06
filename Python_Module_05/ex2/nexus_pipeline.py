@@ -34,7 +34,8 @@ class ProcessingPipeline(ABC):
 
     @abstractmethod
     def add_stage(self, stage: ProcessingStage) -> None:
-        self.stages = [InputStage(), TransformStage(), OutputStage()]
+        self.stages.append(stage)
+        # = [InputStage(), TransformStage(), OutputStage()]
 
     @abstractmethod
     def process(self, data: Any) -> Any:
@@ -45,19 +46,11 @@ class ProcessingPipeline(ABC):
             in_loop = out_loop
         return out_loop
 
-
-class JSONAdapter(ProcessingPipeline):
-
-    pipeline_id: str
-
-    def __init__(self, pipeline_id: str) -> None:
-        self.pipeline_id = pipeline_id
-
-    def process(self, data: Any) -> Union[str, Any]:
-        pass
+class Adapter(ABC):
+    pass
 
 
-class CSVAdapter(ProcessingPipeline):
+class JSONAdapter(Adapter):
 
     pipeline_id: str
 
@@ -68,7 +61,7 @@ class CSVAdapter(ProcessingPipeline):
         pass
 
 
-class StreamAdapter(ProcessingPipeline):
+class CSVAdapter(Adapter):
 
     pipeline_id: str
 
@@ -77,27 +70,41 @@ class StreamAdapter(ProcessingPipeline):
 
     def process(self, data: Any) -> Union[str, Any]:
         pass
+
+
+class StreamAdapter(Adapter):
+
+    pipeline_id: str
+
+    def __init__(self, pipeline_id: str) -> None:
+        self.pipeline_id = pipeline_id
+
+    def process(self, data: Any) -> Union[str, Any]:
+        pass
+
+
+class Pipeline(ProcessingPipeline):
+    pass
 
 
 class NexusManager():
 
-    stages: list[Pipeline]
+    pipelines: list[Pipeline]
 
     def __init__(self) -> None:
         print("Pipeline capacity: 1000 streams/second")
 
-    def add_pipeline(self, stage: ProcessingStage) -> None:
-        self.stages
-        pass
+    def add_pipeline(self, pipeline: Pipeline) -> None:
+        self.pipelines.append(pipeline)
 
-    def process(self, data: Any) -> Union[str, Any]:
+    def process_data(self):
         pass
 
     def demo(self) -> None:
 
         pipeline_print_list: list[str] = []
         letter_order = "ABCDEFGHIJKLMNOPQRSTUBWXYZ"
-        for pipeline in self.stages:
+        for pipeline in self.pipelines:
             pipeline_print_list.append("Pipeline " + letter_order[len(pipeline_print_list)])
         print(" -> ".join(pipeline_print_list))
 
