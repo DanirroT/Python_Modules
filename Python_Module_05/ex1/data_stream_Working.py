@@ -19,11 +19,17 @@ class DataStream(ABC):
     name_str: str
     error_msg: str
 
-    def __init__(self, stream_id: str) -> None:
+    def __init__(self, name: str, stream_id: str, data_type: str) -> None:
 
+        if not name:
+            raise ValueError("Stream name cannot be empty.")
+        self.name = name
         if not stream_id:
             raise ValueError("Stream ID cannot be empty.")
         self.stream_id = stream_id
+        if not data_type:
+            raise ValueError("Stream Type cannot be empty.")
+        self.data_type = data_type
 
     @abstractmethod
     def process_batch(self, data_batch: List[Any]
@@ -119,11 +125,8 @@ class SensorType(DataType):
 
 class SensorStream(DataStream):
 
-    def __init__(self, stream_id: str) -> None:
-        super().__init__(stream_id)
-        self.name = "Sensor"
-        self.data_type = "Environmental Data"
-
+    def __init__(self, name: str, stream_id: str, data_type: str) -> None:
+        super().__init__(name, stream_id, data_type)
         self.type_str = "Sensor"
         self.name_str = "readings processed"
         self.error_msg = "ritical sensor alerts"
@@ -239,10 +242,12 @@ class TransactionType(DataType):
 
 class TransactionStream(DataStream):
 
-    def __init__(self, stream_id: str) -> None:
-        super().__init__(stream_id)
-        self.name = "Transaction"
-        self.data_type = "Financial Data"
+    type_str: str
+    name_str: str
+    error_msg: str
+
+    def __init__(self, name: str, stream_id: str, data_type: str) -> None:
+        super().__init__(name, stream_id, data_type)
 
         self.type_str = "Transaction"
         self.name_str = "operations processed"
@@ -335,10 +340,8 @@ class EventType(DataType):
 
 class EventStream(DataStream):
 
-    def __init__(self, stream_id: str) -> None:
-        super().__init__(stream_id)
-        self.name = "Event"
-        self.data_type = "System Events"
+    def __init__(self, name: str, stream_id: str, data_type: str) -> None:
+        super().__init__(name, stream_id, data_type)
 
         self.type_str = "Event"
         self.name_str = "events processed"
@@ -532,7 +535,7 @@ def data_stream() -> None:
 
     print("Initializing Sensor Stream...")
 
-    Sensor = SensorStream("SENSOR_001")
+    Sensor = SensorStream("Sensor", "SENSOR_001", "Environmental Data")
 
     print(Sensor.process_batch([
         SensorType("temp", 22.5),  # °C
@@ -556,7 +559,8 @@ def data_stream() -> None:
 
     print("Initializing Transaction Stream...")
 
-    Transaction = TransactionStream("TRANS_001")
+    Transaction = TransactionStream("Transaction", "TRANS_001",
+                                    "Financial Data")
 
     print(Transaction.process_batch([
         TransactionType("buy", 100),
@@ -579,7 +583,7 @@ def data_stream() -> None:
 
     print("Initializing Event Stream...")
 
-    Event = EventStream("EVENT_001")
+    Event = EventStream("Event", "EVENT_001", "System Events")
 
     print(Event.process_batch([
         EventType("login"),
