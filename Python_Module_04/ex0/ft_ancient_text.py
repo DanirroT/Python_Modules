@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
-def ft_ancient_text():
+def ft_ancient_text() -> None:
     print("=== CYBER ARCHIVES - DATA RECOVERY SYSTEM ===")
     print()
     file_name = "ancient_fragment.txt"
 
     # file_dir = ""
     # from self, targeting self
-    file_dir = "../data-generator-tools/"
+    # file_dir = "../data-generator-tools/"
     # from self, targeting data-generator-tools
 
-    # file_dir = "Python_Module_04/ex0/"
+    file_dir = "Python_Module_04/ex0/"
     # from Python_Module_04, targeting self
     # file_dir = "Python_Module_04/data-generator-tools/"
     # from Python_Module_04, targeting data-generator-tools

@@ -9,6 +9,7 @@ def ft_print_stdout(message: str) -> None:
 
 def ft_print_stderr(message: str) -> None:
     print("[ALERT]", message, file=sys.stderr)
+    # sys.stdout.write(f"[ALERT] {message}")
 
 
 def ft_read_stdin(prompt: str) -> str:

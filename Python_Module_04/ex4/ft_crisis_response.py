@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-def ft_crisis_response():
+def ft_crisis_response() -> None:
     print("=== CYBER ARCHIVES - CRISIS RESPONSE SYSTEM ===")
     print()
     files_to_access = [
@@ -10,10 +10,10 @@ def ft_crisis_response():
 
     # dir = ""
     # from self, targeting self
-    dir = "../data-generator-tools/"
+    # dir = "../data-generator-tools/"
     # from self, targeting data-generator-tools
 
-    # dir = "Python_Module_04/ex0/"
+    # dir = "Python_Module_04/ex4/"
     # from Python_Module_04, targeting self
     dir = "Python_Module_04/data-generator-tools/"
     # from Python_Module_04, targeting data-generator-tools

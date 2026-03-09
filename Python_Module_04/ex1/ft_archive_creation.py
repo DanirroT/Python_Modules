@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
-def ft_archive_creation():
+def ft_archive_creation() -> None:
     print("=== CYBER ARCHIVES - PRESERVATION SYSTEM ===")
+
     print()
+
     file_name = "new_discovery.txt"
 
     print("Initializing new storage unit:", file_name)

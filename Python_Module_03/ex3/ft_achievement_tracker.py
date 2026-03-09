@@ -59,7 +59,7 @@ class PlayerAnalytics():
                                   "pacifist", "first_kill", "berserker",
                                   "boss_slayer", "strategist",
                                   "explorer", "treasure_hunter",
-                                  "social_butterfly", "lone_wolf"
+                                  "social_butterfly", "lone_wolf",
                                   "speedrun", "collector",
                                   "perfectionist", "completionist"
                                   }
@@ -94,11 +94,12 @@ class PlayerAnalytics():
         print(f"Rare achievements (1 player): {rare_acms}")
 
     def compare(self, i1: int, i2: int) -> None:
-        if self.players[i1] is None or self.players[i2] is None:
+        try:
+            player1 = self.players[i1]
+            player2 = self.players[i2]
+        except IndexError:
             print("Invalid player indices for comparison.")
             return
-        player1 = self.players[i1]
-        player2 = self.players[i2]
         common = player1.achivements.intersection(player2.achivements)
         print(f"{player1.name} vs {player2.name} common: {common}")
         player1_unique = player1.achivements.difference(player2.achivements)
@@ -129,7 +130,7 @@ def ft_achievement_tracker() -> None:
     player_analytics = PlayerAnalytics([alice, bob, charlie])
     player_analytics.analyze_achievements()
     print()
-    player_analytics.compare(0, 1)
+    player_analytics.compare(0, 5)
 
 
 if __name__ == "__main__":

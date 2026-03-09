@@ -110,14 +110,9 @@ def ft_inventory_system() -> None:
 
     for arg in args:
         arg_split = arg.strip().split(":")
-        if len(arg_split) != 2:
+        if len(arg_split) != 2 or not arg_split[0] or not arg_split[1]:
             print(f"\"{arg}\" is not a valid entry. skipping")
             continue
-        if not arg_split[0]:
-            print(f"\"{arg}\" is not a valid entry. skipping")
-            continue
-        if not arg_split[1]:
-            print(f"\"{arg}\" is not a valid entry. skipping")
             continue
         out_1 = arg_split[0]
         try:
@@ -132,6 +127,10 @@ def ft_inventory_system() -> None:
         inventory_split.append((out_1, out_2))
 
     inventory_dict: dict[str, int] = {k: v for k, v in inventory_split}
+
+    if not inventory_dict:
+        print("Inventory has no Valid Items")
+        return
 
     inventory_manager = InventoryMaster(inventory_dict)
 
