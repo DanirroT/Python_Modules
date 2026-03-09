@@ -432,12 +432,14 @@ class OtherType(DataType):
 
 class OtherStream(DataStream):
 
-    def __init__(self, name: str, stream_id: str, data_type: str) -> None:
-        super().__init__(name, stream_id, data_type)
+    def __init__(self, stream_id: str) -> None:
+        super().__init__(stream_id)
+        self.name = "Other"
+        self.data_type = "Any"
 
-    type_str = "Other"
-    name_str = "items processed"
-    error_msg = "other high-priority items present"
+        self.type_str = "Other"
+        self.name_str = "items processed"
+        self.error_msg = "other high-priority items present"
 
     def process_batch(self, data_batch: List[Any]) -> str:
         return super().process_batch(data_batch)
@@ -457,10 +459,10 @@ class StreamProcessor():
 
         self.batch_num = 0
         self.streams = {
-            SensorType: SensorStream("ProssSensor", "S01", "env"),
-            TransactionType: TransactionStream("ProssTrans", "T01", "fin"),
-            EventType: EventStream("ProssEvent", "E01", "sys"),
-            DataType: OtherStream("ProssOther", "O01", "any"),
+            SensorType: SensorStream("S01"),
+            TransactionType: TransactionStream("T01"),
+            EventType: EventStream("E01"),
+            DataType: OtherStream("O01"),
         }
 
     def process_all_batches(self, batches: List[DataType]) -> str:
