@@ -2,22 +2,22 @@
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
-from typing import Any, Type, Union, Protocol  # noqa: F401
+from typing import Any, Union, Protocol
 
 
 class ProcessingStage(Protocol):
 
-    long_msg: str = "Data Processing"
-    demo_msg: str = "Processing"
+    long_msg: str  # = "Data Processing"
+    demo_msg: str  # = "Processing"
 
-    @abstractmethod
     def process(self, data: Any) -> Any:
-        print("You're not supposed to see this\n")
+        pass
 
 
 class ProcessingPipeline(ABC):
 
     stages: list[ProcessingStage]
+    stage_types: list[type[ProcessingStage]]
 
     transform_msg: str
 
@@ -25,9 +25,14 @@ class ProcessingPipeline(ABC):
         self.pipeline_id = pipeline_id
         self.stages = []
 
+    def set_stage_types(self, stage_types: list[type[ProcessingStage]]
+                        ) -> None:
+        self.stage_types = stage_types.copy()
+
     @abstractmethod
-    def add_stage(self, stage: ProcessingStage) -> None:
-        self.stages.append(stage)
+    def add_stage(self) -> None:
+        for stage in self.stage_types:
+            self.stages.append(stage())
         # = [InputStage(), TransformStage(), OutputStage()]
 
     @abstractmethod
@@ -41,16 +46,15 @@ class ProcessingPipeline(ABC):
 
     @staticmethod
     @abstractmethod
-    def data_parsing(in_data: str) -> list[Any]:
+    def data_parsing(in_data: list[str]) -> list[Any]:
         pass
 
     @abstractmethod
-    def data_transform(self, in_data: str) -> list[Any]:
+    def data_transform(self, in_data: list[Any]) -> Any:
         pass
 
-    @staticmethod
     @abstractmethod
-    def str_output(in_data: str) -> list[Any]:
+    def str_output(self, in_data: Any) -> str:
         pass
 
 
@@ -61,15 +65,15 @@ class InputStage():
 
     def process(self, data: dict[ProcessingPipeline, list[str]]) -> dict:
 
-        adapter, real_data = next(out for out in data.items())
+        adapter = data["adapter"]
+        real_data = data["payload"]
+
 
         print("Input:", real_data[0])
 
         out_list = adapter.data_parsing(real_data)
 
-        print("outlist", out_list, out_list[0].__class__)
-
-        return {adapter: out_list}
+        return out_list
 
 
 class TransformStage():
@@ -79,17 +83,15 @@ class TransformStage():
 
     def process(self, data: dict[ProcessingPipeline, Any]) -> dict:
 
-        adapter, real_data = next(out for out in data.items())
+        adapter = data["adapter"]
+        real_data = data["payload"]
+
 
         print("Transform:", adapter.transform_msg)
 
         out_list = adapter.data_transform(real_data)
 
-        print("outlist", out_list, out_list[0].__class__)
-
-        out_dict = {adapter: out_list}
-
-        return out_dict
+        return out_list
 
 
 class OutputStage():
@@ -99,10 +101,14 @@ class OutputStage():
 
     def process(self, data: dict[ProcessingPipeline, Any]) -> str:
 
-        adapter, real_data = next(out for out in data.items())
+        adapter = data["adapter"]
+        real_data = data["payload"]
 
-        out_str = ""
+
+        out_str = adapter.str_output(real_data)
+
         print("Output:", out_str)
+
         return out_str
 
 
@@ -117,11 +123,13 @@ class JSONAdapter(ProcessingPipeline):
         self.transform_msg = "Enriched with metadata and validation"
         self.set_data_defaults()
 
-        for stage in [InputStage, TransformStage, OutputStage]:
-            self.add_stage(stage)
+        self.set_stage_types([InputStage, TransformStage, OutputStage])
 
-    def add_stage(self, stage: ProcessingStage) -> None:
-        self.stages.append(stage())
+        self.add_stage()
+
+    def add_stage(self) -> None:
+        for stage in self.stage_types:
+            self.stages.append(stage())
         # = [InputStage(), TransformStage(), OutputStage()]
 
     def set_data_defaults(self) -> None:
@@ -132,56 +140,86 @@ class JSONAdapter(ProcessingPipeline):
         self.data_defaults["pressure"] = (1000, 1020)
         self.data_defaults["humidity"] = (40, 85)
 
-    def process(self, data: Any) -> Union[str, Any]:
+    def process(self, data: list[str]) -> Union[str, Any]:
         for stage in self.stages:
-            data = stage.process({self: data})
-            print(stage.__class__.__name__, data)
+            data = stage.process({"adapter": self, "payload": data})
+            print("\t", stage.__class__.__name__, data)
         return data
 
     @staticmethod
-    def data_parsing(in_data: str) -> list[dict[str, Any]]:
+    def data_parsing(in_data: list[str]) -> list[dict[str, Any]]:
 
         out_list = []
 
         for i, entry in enumerate(in_data):
 
             out_list.append({})
-            split_entry = entry.strip("\"{} ").split(",")
+            split_entry = entry.strip("{} ").split(",")
 
             for pair in split_entry:
 
                 k, v = pair.split(":")
 
+                k_strip = k.strip("\"\' ")
+                v_strip = v.strip("\"\' ")
+
                 try:
-                    v = float(v)
+                    v_strip = int(v_strip)
                 except ValueError:
                     try:
-                        v = float(v)
+                        v_strip = float(v_strip)
                     except ValueError:
                         pass
 
-                out_list[i][k] = v
+                out_list[i][k_strip] = v_strip
 
         return out_list
 
-    def data_transform(self, in_data: list[dict[str, Any]]) -> list[Any]:
-        print("\tTrasform", in_data)
-        print("\tTrasform", list(self.data_defaults.keys()))
-        out_list = []
+    def data_transform(self, in_data: list[dict[str, Any]]
+                       ) -> list[dict[str, Any]]:
 
         for reading in in_data:
-            print("\t\t", reading.values())
-            if reading.values()["sensor"] in list(self.data_defaults.keys()):
-                reading.values()["norm_range"] = self.data_defaults[reading.values()["sensor"]]
+            sensor = reading["sensor"]
+            reading["norm_range"] = self.data_defaults.get(
+                sensor, (None, None))
+
+        return in_data
+
+
+    def str_output(self, in_data: list[dict[str, Any]]) -> str:
+        print("\toutput", in_data)
+
+        lookup_sensor_name = "temp"
+
+        sensor = value = unit = norm_range = None
+
+        for reading in in_data:
+            print("\t\t : ", reading)
+            if reading["sensor"] == lookup_sensor_name:
+
+                sensor = reading["sensor"]
+                value = reading["value"]
+                unit = reading["unit"]
+                norm_range = reading["norm_range"]
                 break
-            reading.values()["norm_range"] = (None, None)
+        print("\tall got:", sensor, value, unit, norm_range)
 
-        return out_list
+        if sensor == "temp":
+            sensor = "temperature"
 
+        if value < norm_range[0]:
+            range_status = "Under normal range"
+        elif value > norm_range[1]:
+            range_status = "Above normal range"
+        else:
+            range_status = "Normal range"
 
-    @staticmethod
-    def str_output(in_data: str) -> list[Any]:
-        pass
+        out_str = (f"Processed {sensor} reading: {value}{unit} "
+                   f"({range_status})")
+
+        #  Processed temperature reading: 23.5°C (Normal range)
+
+        return out_str
 
 
 class CSVAdapter(ProcessingPipeline):
@@ -192,20 +230,23 @@ class CSVAdapter(ProcessingPipeline):
         super().__init__(pipeline_id)
         self.transform_msg = "Parsed and structured data"
 
-        for stage in [InputStage, TransformStage, OutputStage]:
-            self.add_stage(stage)
+        self.set_stage_types([InputStage, TransformStage, OutputStage])
 
-    def add_stage(self, stage: ProcessingStage) -> None:
-        self.stages.append(stage())
+        self.add_stage()
+
+    def add_stage(self) -> None:
+        for stage in self.stage_types:
+            self.stages.append(stage())
         # = [InputStage(), TransformStage(), OutputStage()]
 
-    def process(self, data: Any) -> Union[str, Any]:
+    def process(self, data: list[str]) -> Union[str, Any]:
         for stage in self.stages:
-            data = stage.process({self: data})
+            data = stage.process({"adapter": self, "payload": data})
+            print("\t", stage.__class__.__name__, data)
         return data
 
     @staticmethod
-    def data_parsing(in_data: str) -> list[list[Any]]:
+    def data_parsing(in_data: list[str]) -> list[list[Any]]:
         out_list: list[list[Any]] = []
 
         for entry in in_data:
@@ -215,7 +256,7 @@ class CSVAdapter(ProcessingPipeline):
             for cell in entry.strip("\" ").split(","):
 
                 try:
-                    cell = float(cell)
+                    cell = int(cell)
                 except ValueError:
                     try:
                         cell = float(cell)
@@ -231,12 +272,35 @@ class CSVAdapter(ProcessingPipeline):
 
         return out_list
 
-    def data_transform(self, in_data: str) -> list[Any]:
-        pass
+    def data_transform(self, in_data: list[list[Any]]
+                       ) -> dict[str, list[Any]]:
 
-    @staticmethod
-    def str_output(in_data: str) -> list[Any]:
-        pass
+        headers = in_data[0]
+
+        data = in_data[1:]
+
+        out_dict: dict[str, list[Any]] = {
+            "lines": ([",".join(map(str, line)) for line in in_data])
+        }
+
+        for i, header in enumerate(headers):
+
+            column: list[Any] = [line[i] if i < len(line) else None
+                                 for line in data]
+
+            # print(f"column {i}:", header, column)
+
+            out_dict[header] = column
+
+        return out_dict
+
+    def str_output(self, in_data: dict[str, list[Any]]) -> str:
+
+        log_len = len(in_data["lines"]) - 1
+
+        out_str = f"User activity logged: {log_len} actions processed"
+
+        return out_str
 
 
 class StreamAdapter(ProcessingPipeline):
@@ -247,20 +311,23 @@ class StreamAdapter(ProcessingPipeline):
         super().__init__(pipeline_id)
         self.transform_msg = "Aggregated and filtered"
 
-        for stage in [InputStage, TransformStage, OutputStage]:
-            self.add_stage(stage)
+        self.set_stage_types([InputStage, TransformStage, OutputStage])
 
-    def add_stage(self, stage: ProcessingStage) -> None:
-        self.stages.append(stage())
+        self.add_stage()
+
+    def add_stage(self) -> None:
+        for stage in self.stage_types:
+            self.stages.append(stage())
         # = [InputStage(), TransformStage(), OutputStage()]
 
-    def process(self, data: Any) -> Union[str, Any]:
+    def process(self, data: list[str]) -> Union[str, Any]:
         for stage in self.stages:
-            data = stage.process({self: data})
+            data = stage.process({"adapter": self, "payload": data})
+            print("\t", stage.__class__.__name__, data)
         return data
 
     @staticmethod
-    def data_parsing(in_data: str) -> list[str]:
+    def data_parsing(in_data: list[str]) -> list[str]:
 
         out_list = []
 
@@ -269,12 +336,116 @@ class StreamAdapter(ProcessingPipeline):
 
         return out_list
 
-    def data_transform(self, in_data: str) -> list[Any]:
-        pass
+    def data_transform(self, in_data: list[str]
+                       ) -> dict[str, dict[str, list]]:
 
-    @staticmethod
-    def str_output(in_data: str) -> list[Any]:
-        pass
+        out_dict: dict[str, dict[str, list]] = {}
+
+        for line in in_data:
+
+            print("\t\t", line)
+
+            if ("{" not in line and ":" not in line
+                    and "\"" not in line and "}" not in line):
+                continue
+
+            line_dict = self.str_dict_decode(line)
+
+            print("\t\tdict: ", line_dict)
+
+            if not out_dict.get(line_dict["sensor"]):
+                out_dict[line_dict["sensor"]] = {
+                    "unit": [line_dict["unit"]], "values": []
+                }
+
+            out_dict[line_dict["sensor"]]["values"].append(line_dict["value"])
+
+            if line_dict["unit"] not in out_dict[line_dict["sensor"]]["unit"]:
+                out_dict[line_dict["sensor"]]["unit"].append(line_dict["unit"])
+
+        return out_dict
+
+    def str_output(self, in_data: dict[str, dict[str, list]]) -> str:
+
+        lookup_stat_name = "temp"
+
+        lookup_stat = "avg"
+
+        values = in_data[lookup_stat_name]["values"]
+
+        unit = ""
+
+        data_num = len(values)
+        data_sum = sum(values)
+        data_avg = data_num / data_sum
+
+        if lookup_stat == "num":
+            output_data = data_num
+
+        if lookup_stat == "sum":
+            output_data = data_sum
+
+        if lookup_stat == "avg":
+            output_data = data_avg
+
+        if lookup_stat == "avg":
+            unit = self.unit(in_data[lookup_stat_name]["unit"])
+
+        output_extra = (f"{lookup_stat}: {output_data}{unit}")
+
+        out_str = f"Stream summary: {log_len} readings, {output_extra}"
+
+        return out_str
+
+
+
+        lookup_stat = "avg"
+        lookup_stat_name = "temp"
+        output_data = stats.get(lookup_stat_name + "_" + lookup_stat)
+        if lookup_stat == "avg":
+            unit = self.unit(lookup_stat_name)
+
+        if lookup_stat and lookustr_outputp_stat_name and output_data:
+            output_extra = (f"{lookup_stat} {lookup_stat_name}:"
+                            f" {output_data}{unit}")
+
+        return ", ".join(x for x in (output_std, output_extra) if x)
+
+    def str_dict_decode(self, in_str: str) -> dict[str, Any]:
+
+        out_dict: dict[str, Any] = {}
+
+        split_in = in_str.strip("{} ").split(",")
+
+        for pair in split_in:
+
+            k, v = pair.split(":")
+
+            k_strip = k.strip("\"\' ")
+            v_strip = v.strip("\"\' ")
+
+            try:
+                v_strip = int(v_strip)
+            except ValueError:
+                try:
+                    v_strip = float(v_strip)
+                except ValueError:
+                    pass
+
+            out_dict[k_strip] = v_strip
+
+        return out_dict
+
+    def unit(self, data_name: str) -> str:
+
+        if data_name == "temp":
+            return "°C"
+        elif data_name == "humidity":
+            return "%"
+        elif data_name == "pressure":
+            return "hPa"
+        else:
+            return ""
 
 
 class NexusManager():
@@ -283,14 +454,17 @@ class NexusManager():
 
     def __init__(self) -> None:
         print("Pipeline capacity: 1000 streams/second")
+        
+        print()
 
         print("Creating Data Processing Pipeline...")
+
 
         self.pipelines = []
 
         self.add_pipeline(JSONAdapter("Nexus_JSON"))
         self.add_pipeline(CSVAdapter("Nexus_CSV"))
-        self.add_pipeline(StreamAdapter("Nexus_Strea"))
+        self.add_pipeline(StreamAdapter("Nexus_Stream"))
 
         for step, stage in enumerate(self.pipelines[0].stages, start=1):
             print(f"Stage {step}:", stage.long_msg)
@@ -298,13 +472,14 @@ class NexusManager():
     def add_pipeline(self, pipeline: ProcessingPipeline) -> None:
         self.pipelines.append(pipeline)
 
-    def process_data(self):
+
+    def process_data(self) -> None:
         pass
 
     def demo(self) -> None:
 
         pipeline_print_list: list[str] = []
-        letter_order = "ABCDEFGHIJKLMNOPQRSTUBWXYZ"
+        letter_order = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         for pipeline in self.pipelines:
             pipeline_print_list.append("Pipeline " +
                                        letter_order[len(pipeline_print_list)])
@@ -348,10 +523,10 @@ def nexus_pipeline() -> None:
 
     print("Processing JSON data through pipeline...")
 
-    nexus.pipelines[0].process([
-        "{\"sensor\": \"temp\", \"value\": 23.5, \"unit\": \"C\"}",
-        "{\"sensor\": \"pressure\", \"value\": 1018, \"unit\": \"hPa\"}"
-    ])
+    # nexus.pipelines[0].process([
+    #     "{\"sensor\": \"temp\", \"value\": 23.5, \"unit\": \"C\"}",
+    #     "{\"sensor\": \"pressure\", \"value\": 1018, \"unit\": \"hPa\"}"
+    # ])
 
     print()
 
@@ -360,13 +535,19 @@ def nexus_pipeline() -> None:
     # nexus.pipelines[1].process(["\"user,action,timestamp\"",
     #                             "\"daniel,did something,06052025\""])
 
-    # \ndaniel,did something,06052025
-
     print()
+
+    {}.values
 
     print("Processing Stream data through same pipeline...")
 
-    # nexus.pipelines[2].process(["Real-time sensor stream"])
+    nexus.pipelines[2].process([
+        "Real-time sensor stream",
+        "{\"sensor\": \"temp\", \"value\": 22.1, \"unit\": \"°C\"}",
+        "{\"sensor\": \"temp\", \"value\": 20, \"unit\": \"°C\"}",
+        "{\"sensor\": \"temp\", \"value\": 24.4, \"unit\": \"°C\"}",
+        "{\"sensor\": \"temp\", \"value\": 22.1, \"unit\": \"°C\"}",
+        "{\"sensor\": \"temp\", \"value\": 22.1, \"unit\": \"°C\"}"])
 
     print()
 
