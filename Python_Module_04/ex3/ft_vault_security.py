@@ -12,9 +12,14 @@ def ft_vault_security() -> None:
     # from self, targeting data-generator-tools
 
     # dir = "Python_Module_04/ex3/"
-    # from Python_Module_04, targeting self
-    dir = "Python_Module_04/data-generator-tools/"
-    # from Python_Module_04, targeting data-generator-tools
+    # from Python_Modules, targeting self
+    # dir = "Python_Module_04/data-generator-tools/"
+    # from Python_Modules, targeting data-generator-tools
+
+    # dir = "ex3/"
+    # from eval, targeting self
+    dir = "data-generator-tools/"
+    # from eval, targeting data-generator-tools
 
     # dir = "ex0/"
     # from eval, targeting self

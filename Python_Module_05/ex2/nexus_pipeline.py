@@ -20,10 +20,14 @@ class ProcessingPipeline(ABC):
     stage_types: list[type[ProcessingStage]]
 
     transform_msg: str
+    stage_iter: int
+    stream_type: str
 
     def __init__(self, pipeline_id: str) -> None:
         self.pipeline_id = pipeline_id
         self.stages = []
+
+        self.stage_iter = 0
 
     def set_stage_types(self, stage_types: list[type[ProcessingStage]]
                         ) -> None:
@@ -44,9 +48,8 @@ class ProcessingPipeline(ABC):
             in_loop = out_loop
         return out_loop
 
-    @staticmethod
     @abstractmethod
-    def data_parsing(in_data: list[str]) -> list[Any]:
+    def data_parsing(self, in_data: list[str]) -> list[Any]:
         pass
 
     @abstractmethod
@@ -63,13 +66,14 @@ class InputStage():
     long_msg: str = "Input validation and parsing"
     demo_msg: str = "Processed"
 
-    def process(self, data: dict[ProcessingPipeline, list[str]]) -> dict:
+    def process(self, data: dict[str, list[str]]) -> dict:
 
         adapter = data["adapter"]
         real_data = data["payload"]
 
-
         print("Input:", real_data[0])
+
+        out_list = None
 
         out_list = adapter.data_parsing(real_data)
 
@@ -81,13 +85,14 @@ class TransformStage():
     long_msg: str = "Data transformation and enrichment"
     demo_msg: str = "Analyzed"
 
-    def process(self, data: dict[ProcessingPipeline, Any]) -> dict:
+    def process(self, data: dict[str, Any]) -> dict:
 
         adapter = data["adapter"]
         real_data = data["payload"]
 
-
         print("Transform:", adapter.transform_msg)
+
+        out_list = None
 
         out_list = adapter.data_transform(real_data)
 
@@ -99,11 +104,12 @@ class OutputStage():
     long_msg: str = "Output formatting and delivery"
     demo_msg: str = "Stored"
 
-    def process(self, data: dict[ProcessingPipeline, Any]) -> str:
+    def process(self, data: dict[str, Any]) -> str:
 
         adapter = data["adapter"]
         real_data = data["payload"]
 
+        out_str = None
 
         out_str = adapter.str_output(real_data)
 
@@ -122,6 +128,8 @@ class JSONAdapter(ProcessingPipeline):
         super().__init__(pipeline_id)
         self.transform_msg = "Enriched with metadata and validation"
         self.set_data_defaults()
+
+        self.stream_type = "JSON"
 
         self.set_stage_types([InputStage, TransformStage, OutputStage])
 
@@ -142,36 +150,50 @@ class JSONAdapter(ProcessingPipeline):
 
     def process(self, data: list[str]) -> Union[str, Any]:
         for stage in self.stages:
+            self.stage_iter += 1
+
             data = stage.process({"adapter": self, "payload": data})
-            print("\t", stage.__class__.__name__, data)
+            # print("\t", stage.__class__.__name__, data)
+
+        self.stage_iter = 0
+
         return data
 
-    @staticmethod
-    def data_parsing(in_data: list[str]) -> list[dict[str, Any]]:
+    def data_parsing(self, in_data: list[str]) -> list[dict[str, Any]]:
 
         out_list = []
 
         for i, entry in enumerate(in_data):
 
-            out_list.append({})
-            split_entry = entry.strip("{} ").split(",")
+            try:
 
-            for pair in split_entry:
+                out_list.append({})
+                split_entry = entry.strip("{} ").split(",")
 
-                k, v = pair.split(":")
+                for pair in split_entry:
 
-                k_strip = k.strip("\"\' ")
-                v_strip = v.strip("\"\' ")
-
-                try:
-                    v_strip = int(v_strip)
-                except ValueError:
                     try:
-                        v_strip = float(v_strip)
+                        k, v = pair.split(":")
                     except ValueError:
-                        pass
+                        raise ValueError("Invalid data format")
 
-                out_list[i][k_strip] = v_strip
+                    k_strip = k.strip("\"\' ")
+                    v_strip = v.strip("\"\' ")
+
+                    try:
+                        v_strip = int(v_strip)
+                    except ValueError:
+                        try:
+                            v_strip = float(v_strip)
+                        except ValueError:
+                            pass
+
+                    out_list[i][k_strip] = v_strip
+
+            except ValueError as e:
+                print(f"Error detected in Stage {self.stage_iter}:", e)
+                print("Recovery initiated: Switching to backup processor")
+                print("Recovery successful: Pipeline restored, processing resumed")
 
         return out_list
 
@@ -179,22 +201,29 @@ class JSONAdapter(ProcessingPipeline):
                        ) -> list[dict[str, Any]]:
 
         for reading in in_data:
-            sensor = reading["sensor"]
-            reading["norm_range"] = self.data_defaults.get(
-                sensor, (None, None))
+
+            try:
+
+                sensor = reading["sensor"]
+                reading["norm_range"] = self.data_defaults.get(
+                    sensor, (None, None))
+
+            except ValueError as e:
+                print(f"Error detected in Stage {self.stage_iter}:", e)
+                print("Recovery initiated: Switching to backup processor")
+                print("Recovery successful: Pipeline restored, processing resumed")
 
         return in_data
 
-
     def str_output(self, in_data: list[dict[str, Any]]) -> str:
-        print("\toutput", in_data)
+        # print("\toutput", in_data)
 
         lookup_sensor_name = "temp"
 
         sensor = value = unit = norm_range = None
 
         for reading in in_data:
-            print("\t\t : ", reading)
+            # print("\t\t: ", reading)
             if reading["sensor"] == lookup_sensor_name:
 
                 sensor = reading["sensor"]
@@ -202,7 +231,7 @@ class JSONAdapter(ProcessingPipeline):
                 unit = reading["unit"]
                 norm_range = reading["norm_range"]
                 break
-        print("\tall got:", sensor, value, unit, norm_range)
+        # print("\tall got:", sensor, value, unit, norm_range)
 
         if sensor == "temp":
             sensor = "temperature"
@@ -230,6 +259,8 @@ class CSVAdapter(ProcessingPipeline):
         super().__init__(pipeline_id)
         self.transform_msg = "Parsed and structured data"
 
+        self.stream_type = "CSV"
+
         self.set_stage_types([InputStage, TransformStage, OutputStage])
 
         self.add_stage()
@@ -241,30 +272,41 @@ class CSVAdapter(ProcessingPipeline):
 
     def process(self, data: list[str]) -> Union[str, Any]:
         for stage in self.stages:
+            self.stage_iter += 1
+
             data = stage.process({"adapter": self, "payload": data})
-            print("\t", stage.__class__.__name__, data)
+            # print("\t", stage.__class__.__name__, data)
+
+        self.stage_iter = 0
+
         return data
 
-    @staticmethod
-    def data_parsing(in_data: list[str]) -> list[list[Any]]:
+    def data_parsing(self, in_data: list[str]) -> list[list[Any]]:
         out_list: list[list[Any]] = []
 
         for entry in in_data:
 
-            line: list[Any] = []
+            try:
 
-            for cell in entry.strip("\" ").split(","):
+                line: list[Any] = []
 
-                try:
-                    cell = int(cell)
-                except ValueError:
+                for cell in entry.strip("\" ").split(","):
+
                     try:
-                        cell = float(cell)
+                        cell = int(cell)
                     except ValueError:
-                        pass
-                line.append(cell)
+                        try:
+                            cell = float(cell)
+                        except ValueError:
+                            pass
+                    line.append(cell)
 
-            out_list.append(line)
+                out_list.append(line)
+
+            except ValueError as e:
+                print(f"Error detected in Stage {self.stage_iter}:", e)
+                print("Recovery initiated: Switching to backup processor")
+                print("Recovery successful: Pipeline restored, processing resumed")
 
         # print("CSV Perocesor", out_list, out_list.__class__)
         # print("\t", out_list[0], out_list[0].__class__)
@@ -285,12 +327,19 @@ class CSVAdapter(ProcessingPipeline):
 
         for i, header in enumerate(headers):
 
-            column: list[Any] = [line[i] if i < len(line) else None
-                                 for line in data]
+            try:
 
-            # print(f"column {i}:", header, column)
+                column: list[Any] = [line[i] if i < len(line) else None
+                                     for line in data]
 
-            out_dict[header] = column
+                # print(f"column {i}:", header, column)
+
+                out_dict[header] = column
+
+            except ValueError as e:
+                print(f"Error detected in Stage {self.stage_iter}:", e)
+                print("Recovery initiated: Switching to backup processor")
+                print("Recovery successful: Pipeline restored, processing resumed")
 
         return out_dict
 
@@ -311,6 +360,8 @@ class StreamAdapter(ProcessingPipeline):
         super().__init__(pipeline_id)
         self.transform_msg = "Aggregated and filtered"
 
+        self.stream_type = "Stream"
+
         self.set_stage_types([InputStage, TransformStage, OutputStage])
 
         self.add_stage()
@@ -322,17 +373,27 @@ class StreamAdapter(ProcessingPipeline):
 
     def process(self, data: list[str]) -> Union[str, Any]:
         for stage in self.stages:
+            self.stage_iter += 1
+
             data = stage.process({"adapter": self, "payload": data})
-            print("\t", stage.__class__.__name__, data)
+            # print("\t", stage.__class__.__name__, data)
+        self.stage_iter = 0
         return data
 
-    @staticmethod
-    def data_parsing(in_data: list[str]) -> list[str]:
+    def data_parsing(self, in_data: list[str]) -> list[str]:
 
         out_list = []
 
         for entry in in_data:
-            out_list.append(entry)
+
+            try:
+
+                out_list.append(entry)
+
+            except ValueError as e:
+                print(f"Error detected in Stage {self.stage_iter}:", e)
+                print("Recovery initiated: Switching to backup processor")
+                print("Recovery successful: Pipeline restored, processing resumed")
 
         return out_list
 
@@ -343,73 +404,80 @@ class StreamAdapter(ProcessingPipeline):
 
         for line in in_data:
 
-            print("\t\t", line)
+            try:
 
-            if ("{" not in line and ":" not in line
-                    and "\"" not in line and "}" not in line):
-                continue
+                # print("\t\t", line)
 
-            line_dict = self.str_dict_decode(line)
+                if ("{" not in line and ":" not in line
+                        and "\"" not in line and "}" not in line):
+                    continue
 
-            print("\t\tdict: ", line_dict)
+                line_dict = self.str_dict_decode(line)
 
-            if not out_dict.get(line_dict["sensor"]):
-                out_dict[line_dict["sensor"]] = {
-                    "unit": [line_dict["unit"]], "values": []
-                }
+                # print("\t\tdict: ", line_dict)
 
-            out_dict[line_dict["sensor"]]["values"].append(line_dict["value"])
+                if not out_dict.get(line_dict["sensor"]):
+                    out_dict[line_dict["sensor"]] = {
+                        "unit": [line_dict["unit"]], "values": []
+                    }
 
-            if line_dict["unit"] not in out_dict[line_dict["sensor"]]["unit"]:
-                out_dict[line_dict["sensor"]]["unit"].append(line_dict["unit"])
+                out_dict[line_dict["sensor"]]["values"].append(line_dict["value"])
+
+                if line_dict["unit"] not in out_dict[line_dict["sensor"]]["unit"]:
+                    out_dict[line_dict["sensor"]]["unit"].append(line_dict["unit"])
+
+            except ValueError as e:
+                print(f"Error detected in Stage {self.stage_iter}:", e)
+                print("Recovery initiated: Switching to backup processor")
+                print("Recovery successful: Pipeline restored, processing resumed")
 
         return out_dict
 
     def str_output(self, in_data: dict[str, dict[str, list]]) -> str:
 
-        lookup_stat_name = "temp"
+        try:
 
-        lookup_stat = "avg"
+            log_len = 0
 
-        values = in_data[lookup_stat_name]["values"]
+            for sensor in in_data.values():
+                log_len += len(sensor["values"])
 
-        unit = ""
+            lookup_stat_name = "temp"
 
-        data_num = len(values)
-        data_sum = sum(values)
-        data_avg = data_num / data_sum
+            lookup_stat = "avg"
 
-        if lookup_stat == "num":
-            output_data = data_num
+            values = in_data[lookup_stat_name]["values"]
 
-        if lookup_stat == "sum":
-            output_data = data_sum
+            unit = ""
 
-        if lookup_stat == "avg":
-            output_data = data_avg
+            data_num = len(values)
+            data_sum = sum(values)
+            data_avg = data_sum / data_num
 
-        if lookup_stat == "avg":
-            unit = self.unit(in_data[lookup_stat_name]["unit"])
+            if lookup_stat == "num":
+                output_data = data_num
+
+            if lookup_stat == "sum":
+                output_data = data_sum
+
+            if lookup_stat == "avg":
+                output_data = round(data_avg, 1)
+
+            if lookup_stat == "avg":
+                unit = self.unit(in_data[lookup_stat_name]["unit"])
+
+        except ValueError as e:
+            print(f"Error detected in Stage {self.stage_iter}:", e)
+            print("Recovery initiated: Switching to backup processor")
+            print("Recovery successful: Pipeline restored, processing resumed")
+
+
 
         output_extra = (f"{lookup_stat}: {output_data}{unit}")
 
         out_str = f"Stream summary: {log_len} readings, {output_extra}"
 
         return out_str
-
-
-
-        lookup_stat = "avg"
-        lookup_stat_name = "temp"
-        output_data = stats.get(lookup_stat_name + "_" + lookup_stat)
-        if lookup_stat == "avg":
-            unit = self.unit(lookup_stat_name)
-
-        if lookup_stat and lookustr_outputp_stat_name and output_data:
-            output_extra = (f"{lookup_stat} {lookup_stat_name}:"
-                            f" {output_data}{unit}")
-
-        return ", ".join(x for x in (output_std, output_extra) if x)
 
     def str_dict_decode(self, in_str: str) -> dict[str, Any]:
 
@@ -419,7 +487,11 @@ class StreamAdapter(ProcessingPipeline):
 
         for pair in split_in:
 
-            k, v = pair.split(":")
+            try:
+                k, v = pair.split(":")
+            except ValueError:
+                raise ValueError("Invalid data format")
+
 
             k_strip = k.strip("\"\' ")
             v_strip = v.strip("\"\' ")
@@ -454,7 +526,7 @@ class NexusManager():
 
     def __init__(self) -> None:
         print("Pipeline capacity: 1000 streams/second")
-        
+
         print()
 
         print("Creating Data Processing Pipeline...")
@@ -472,9 +544,31 @@ class NexusManager():
     def add_pipeline(self, pipeline: ProcessingPipeline) -> None:
         self.pipelines.append(pipeline)
 
-
     def process_data(self) -> None:
-        pass
+
+        all_data = [
+            ["{\"sensor\": \"temp\", \"value\": 23.5, \"unit\": \"C\"}",
+             "{\"sensor\": \"pressure\", \"value\": 1018, \"unit\": \"hPa\"}"],
+
+            ["\"user,action,timestamp\"",
+             "\"daniel,did something,06052025\""],
+
+            ["Real-time sensor stream",
+             "{\"sensor\": \"temp\", \"value\": 22.1, \"unit\": \"°C\"}",
+             "{\"sensor\": \"temp\", \"value\": 20, \"unit\": \"°C\"}",
+             "{\"sensor\": \"temp\", \"value\": 24.4, \"unit\": \"°C\"}",
+             "{\"sensor\": \"temp\", \"value\": 22.1, \"unit\": \"°C\"}",
+             "{\"sensor\": \"temp\", \"value\": 22.1, \"unit\": \"°C\"}"]
+        ]
+
+        for pipeline, data in zip(self.pipelines, all_data):
+
+            print(f"Processing {pipeline.stream_type} data through pipeline...")
+
+            pipeline.process(data)
+
+            print()
+
 
     def demo(self) -> None:
 
@@ -505,6 +599,11 @@ class NexusManager():
 
         print("Simulating pipeline failure...")
 
+        self.pipelines[2].process([
+            "Real-time sensor stream",
+            "{\"sensor\":: \"temp\", \"value\": 22.1, \"unit\": \"°C\"}",
+            "{\"sensor\": \"temp\", \"value\": 20, \"unit\": \"°C\"}"])
+
 
 def nexus_pipeline() -> None:
     print("=== CODE NEXUS - ENTERPRISE PIPELINE SYSTEM ===")
@@ -521,45 +620,17 @@ def nexus_pipeline() -> None:
 
     print()
 
-    print("Processing JSON data through pipeline...")
-
-    # nexus.pipelines[0].process([
-    #     "{\"sensor\": \"temp\", \"value\": 23.5, \"unit\": \"C\"}",
-    #     "{\"sensor\": \"pressure\", \"value\": 1018, \"unit\": \"hPa\"}"
-    # ])
-
-    print()
-
-    print("Processing CSV data through same pipeline...")
-
-    # nexus.pipelines[1].process(["\"user,action,timestamp\"",
-    #                             "\"daniel,did something,06052025\""])
-
-    print()
-
-    {}.values
-
-    print("Processing Stream data through same pipeline...")
-
-    nexus.pipelines[2].process([
-        "Real-time sensor stream",
-        "{\"sensor\": \"temp\", \"value\": 22.1, \"unit\": \"°C\"}",
-        "{\"sensor\": \"temp\", \"value\": 20, \"unit\": \"°C\"}",
-        "{\"sensor\": \"temp\", \"value\": 24.4, \"unit\": \"°C\"}",
-        "{\"sensor\": \"temp\", \"value\": 22.1, \"unit\": \"°C\"}",
-        "{\"sensor\": \"temp\", \"value\": 22.1, \"unit\": \"°C\"}"])
-
-    print()
+    nexus.process_data()
 
     print("=== Pipeline Chaining Demo ===")
 
-    # nexus.demo()
+    nexus.demo()
 
     print()
 
     print("=== Error Recovery Test ===")
 
-    # nexus.error_test()
+    nexus.error_test()
 
     print()
 

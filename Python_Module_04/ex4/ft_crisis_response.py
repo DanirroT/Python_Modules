@@ -14,9 +14,14 @@ def ft_crisis_response() -> None:
     # from self, targeting data-generator-tools
 
     # dir = "Python_Module_04/ex4/"
-    # from Python_Module_04, targeting self
-    dir = "Python_Module_04/data-generator-tools/"
-    # from Python_Module_04, targeting data-generator-tools
+    # from Python_Modules, targeting self
+    # dir = "Python_Module_04/data-generator-tools/"
+    # from Python_Modules, targeting data-generator-tools
+
+    # dir = "ex4/"
+    # from eval, targeting self
+    dir = "data-generator-tools/"
+    # from eval, targeting data-generator-tools
 
     for file_name in files_to_access:
         try:
