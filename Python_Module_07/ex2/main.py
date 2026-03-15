@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from ex2.EliteCard import EliteCard
+from .EliteCard import EliteCard
 
 # for this project to work, use:
 #   python -m ex2.main

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from ex0.CreatureCard import CreatureCard
+from .CreatureCard import CreatureCard
 
 # for this project to work, use:
 #   python -m ex0.main

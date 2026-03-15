@@ -23,7 +23,7 @@ class ArtifactCard(Card):
             raise ValueError("Card durability must be positive.")
         self.durability = durability_int
 
-        if not effect«:
+        if not effect:
             raise ValueError("Card effect cannot be empty.")
         self.effect = effect
 

@@ -6,6 +6,8 @@ from abc import ABC, abstractmethod
 
 class GameStrategy(ABC):
 
+    total_damage: int = 0
+
     @abstractmethod
     def execute_turn(self, hand: list, battlefield: list) -> dict:
         pass

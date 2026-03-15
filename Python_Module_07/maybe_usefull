@@ -1,0 +1,152 @@
+
+from .ex0.Card import Card
+from .ex1.Deck import Deck
+
+# return ([card.name
+#          for opponent in self.oponents
+#          for card in opponent.field]
+#          + [opponent.name for opponent in self.oponents])
+
+
+class Player():
+
+    name: str
+    mana: int
+    health: int
+
+    oponents: list["Player"]
+
+    hand: list[Card] = []
+    field: list[Card] = []
+    deck: Deck
+    game_state: dict[str, int]
+
+    def __init__(self, name: str):
+
+        if not name:
+            raise ValueError("Player name cannot be empty.")
+        self.name = name
+
+        self.mana = 0
+        self.health = 20
+
+    def set_oponents(self, oponents: list["Player"]) -> None:
+        self.oponents = oponents
+
+    def set_deck(self, deck: Deck, shuffe: Optional[bool] = True) -> None:
+        self.deck = deck
+        if shuffe:
+            deck.shuffle()
+
+    def draw(self, quantity: int) -> None:
+        self.add_hand(self.deck.draw_card())
+
+    def add_hand(self, card: Card) -> None:
+        self.hand.append(card)
+
+    def play_card(self, p_card: Card) -> None:
+        for h_card in self.hand:
+            if p_card == h_card:
+                if h_card.play({"mana": self.mana}):
+                    self.field.append(h_card)
+                    self.hand.remove(h_card)
+                    return
+
+    def set_hand(self, hand: list[Card]) -> None:
+        self.hand = hand
+
+    def set_field(self, field: list[Card]) -> None:
+        self.field = field
+
+    def get_hand(self) -> list[str]:
+        return [f"{card.name} ({card.name})" for card in self.hand]
+
+    def get_field(self) -> list[str]:
+        return [f"{card.name} ({card.name})" for card in self.field]
+
+    # def get_all_targets(self) -> list[list["Player" | Card]]:
+    #     output_list: list[list["Player" | Card]] = []
+
+    #     for opponent in self.oponents:
+    #         line_list = [opponent] + opponent.field
+    #         output_list.append(line_list)
+
+    #     return output_list
+
+
+"""
+    def simulate_turn(self) -> dict:
+        all_targets = self.strategy.prioritize_targets(
+            self.players[0].get_all_targets())
+        mana_used = 0
+        self.turns_simulated += 1
+        return {'cards_played': ['Goblin Warrior', 'Lightning Bolt'],
+                'mana_used': mana_used,
+                'targets_attacked': targets,
+                'damage_dealt': 8}
+"""
+
+
+"""
+list[tuple[str, str, Card, Player, Card, int]]
+        out_list: list[tuple[str, str, Card, Player, Card, int]] = []
+
+        for attacker in self.player.field:
+
+            to_list = None
+            oponent = None
+            chosen_target = None
+            hp_remainin = None
+
+            if attacker.type == "Creature":
+                card_power = attacker.attack
+            if attacker.type == "Artefact":
+                if "damage" in card.effect:
+                    match = re.search(r"(\d+)\sdamage", card.effect)
+                    card_power = int(match.group(1))
+
+            if to_list:
+                out_list.append((
+                    "field", attacker.type, attacker,
+                    oponent, chosen_target, hp_remainin
+                ))
+
+        for card in self.player.hand:
+
+            to_list = None
+            oponent = None
+            chosen_target = None
+            hp_remainin = None
+
+            if card.type == "Spell":
+                if "damage" in card.effect:
+                    match = re.search(r"(\d+)\sdamage", card.effect)
+                    card_power = int(match.group(1))
+
+                    for target in available_targets:
+                        if target in out_list:
+                            target_hp = out_list
+                        else:
+
+
+
+
+            if to_list:
+                out_list.append((
+                    "field", attacker.type, attacker,
+                    oponent, chosen_target, hp_remainin
+                ))
+
+
+
+
+
+
+        priority_helath = 0
+        priority_target: Card
+        for target in available_targets:
+            if priority_helath == 0 or target.health < priority_helath:
+                priority_helath = target.health
+                priority_target = target
+        return out_list
+"""

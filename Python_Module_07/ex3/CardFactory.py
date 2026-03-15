@@ -11,12 +11,7 @@ from ex1.ArtifactCard import ArtifactCard
 
 class CardFactory(ABC):
 
-    supported_types: dict[str, list[str]]
-
-    def __init__(self):
-        self.supported_types = {'creatures': [],
-                                'spells': [],
-                                'artifacts': []}
+    cards_created: int = 0
 
     @abstractmethod
     def create_creature(self, name_or_power: str | int | None = None) -> Card:
@@ -66,4 +61,24 @@ class CardFactory(ABC):
 
     @abstractmethod
     def get_supported_types(self) -> dict:
-        return self.supported_types
+        pass
+
+        out_dict: dict[str, list[str]] = {}
+
+        for card in deck:
+            if isinstance(card, CreatureCard):
+                if not out_dict.get("creatures"):
+                    out_dict["creatures"] = []
+                out_dict["creatures"].append(card.name)
+
+            if isinstance(card, SpellCard):
+                if not out_dict.get("spells"):
+                    out_dict["spells"] = []
+                out_dict["spells"].append(card.name)
+
+            if isinstance(card, ArtifactCard):
+                if not out_dict.get("artifacts"):
+                    out_dict["artifacts"] = []
+                out_dict["artifacts"].append(card.name)
+
+        return out_dict

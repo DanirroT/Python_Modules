@@ -2,85 +2,56 @@
 
 from .GameStrategy import GameStrategy
 from ex0.Card import Card
+from ex0.CreatureCard import CreatureCard
+from ex1.SpellCard import SpellCard
+from ex1.ArtifactCard import ArtifactCard
 
 import re
-
-from .main import Player
 
 
 class AggressiveStrategy(GameStrategy):
 
-    player: Player
+    def execute_turn(self, hand: list[Card], battlefield: list[CreatureCard]
+                     ) -> dict:
 
-    def execute_turn(self, hand: list, battlefield: list) -> dict:
-        return {}
+        priorities = self.prioritize_targets(battlefield)
+
+        atk_list: list[Card] = []
+
+        atk_list = [card for card in sorted(hand, key=lambda c: c.cost)][:2]
+
+        mana_cost = 0
+        dmg_dealt = 0
+
+        for card in atk_list:
+
+            mana_cost += card.cost
+            if isinstance(card, CreatureCard):
+                dmg_dealt += card.attack
+
+            elif isinstance(card, SpellCard):
+                match = re.search(r"(\d+)\sdamage", card.effect_type)
+                dmg_dealt += int(match.group(1)) if match else 0
+
+            elif isinstance(card, ArtifactCard):
+                match = re.search(r"(\d+)\sdamage", card.effect)
+                dmg_dealt += int(match.group(1)) if match else 0
+
+        self.total_damage += dmg_dealt
+
+        atk_list_names = [card.name for card in atk_list]
+
+        tgt_list_names = [target.name
+                          for target in priorities][:1]
+
+        return {'cards_played': atk_list_names,
+                'mana_used': mana_cost,
+                'targets_attacked': tgt_list_names,
+                'damage_dealt': dmg_dealt}
 
     def get_strategy_name(self) -> str:
         return super().get_strategy_name()
 
-    def prioritize_targets(self, available_targets: list[list["Player" | Card]]
-                           ) -> list[tuple[str, str, Card, Player, Card, int]]:
-
-        out_list: list[tuple[str, str, Card, Player, Card, int]] = []
-
-        for attacker in self.player.field:
-
-            to_list = None
-            oponent = None
-            chosen_target = None
-            hp_remainin = None
-
-            if attacker.type == "Creature":
-                card_power = attacker.attack
-            if attacker.type == "Artefact":
-                if "damage" in card.effect:
-                    match = re.search(r"(\d+)\sdamage", card.effect)
-                    card_power = int(match.group(1))
-
-
-
-
-
-            if to_list:
-                out_list.append((
-                    "field", attacker.type, attacker,
-                    oponent, chosen_target, hp_remainin
-                ))
-
-        for card in self.player.hand:
-
-            to_list = None
-            oponent = None
-            chosen_target = None
-            hp_remainin = None
-
-            if card.type == "Spell":
-                if "damage" in card.effect:
-                    match = re.search(r"(\d+)\sdamage", card.effect)
-                    card_power = int(match.group(1))
-
-                    for target in available_targets:
-                        if target in out_list:
-                            target_hp = out_list
-                        else:
-
-
-
-            if to_list:
-                out_list.append((
-                    "field", attacker.type, attacker,
-                    oponent, chosen_target, hp_remainin
-                ))
-
-
-
-
-
-
-        priority_helath = 0
-        priority_target: Card
-        for target in available_targets:
-            if priority_helath == 0 or target.health < priority_helath:
-                priority_helath = target.health
-                priority_target = target
-        return out_list
+    def prioritize_targets(self, available_targets: list[CreatureCard]
+                           ) -> list[CreatureCard]:
+        return sorted(available_targets, key=lambda t: (t.health, -t.attack))
