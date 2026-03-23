@@ -1,39 +1,65 @@
 #!/usr/bin/env python3
 
 import sys, os
-from _ import site modules
+# from _ import site modules
+
+
+"""
+outside
+
+_ : /usr/bin/python3
+"""
+
+"""
+inside
+
+VIRTUAL_ENV : /home/tribeirinho/42/Python_Modules/.venv  # extra!!
+
+VIRTUAL_ENV_PROMPT : (.venv)  # extra!!
+
+PATH : /home/tribeirinho/42/Python_Modules/.venv/bin  # extra!!
+
+_ : /home/tribeirinho/42/Python_Modules/.venv/bin/python3  # Changed!!
+"""
 
 
 def construct():
 
-    in_vm = True
+    environment = os.environ
 
-    if not in_vm:
+    # for key, value in os.environ.items():
+    #     print(key, ":", value)
+    #     print()
+
+    environment_path = environment.get("VIRTUAL_ENV")
+    current_puython = environment["_"]
+
+    if not environment_path:
 
         matrix_status = "You're still plugged in"
-        current_puython = ""
         viritual_environment = "None detected"
-        environment_path = ""
         main_status_message = "WARNING: You're in the global environment!"
         main_message = "The machines can see everything you install."
 
     else:
 
         matrix_status = "Welcome to the construct"
-        current_puython = ""
-        viritual_environment = ""
-        environment_path = ""
+        # print("1", environment["VIRTUAL_ENV_PROMPT"])
+        viritual_environment = environment["VIRTUAL_ENV_PROMPT"][2:-2]
+        # print("2", viritual_environment)
         main_status_message = "SUCCESS: You're in an isolated environment!"
         main_message = "Safe to install packages without affecting the global system."
 
-
+    print()
+    
     print("MATRIX STATUS:", matrix_status)
 
     print()
 
     print("Current Python:", current_puython)
     print("Virtual Environment:", viritual_environment)
-    print("Environment Path:", environment_path)
+    if environment_path:
+        print("Environment Path:", environment_path)
 
     print()
 
@@ -41,7 +67,7 @@ def construct():
     print(main_message)
     print()
 
-    if not in_vm:
+    if not environment_path:
 
         env_name = "matrix_env"
 
@@ -59,9 +85,16 @@ def construct():
         print("Then run this program again.")
 
     else:
+        # print(viritual_environment)
+
+        for path in environment["PATH"].strip().split(":"):
+            # print(path)
+            if viritual_environment in path:
+                installation_path = path[:-3]
+                break
 
         print("Package installation path:")
-        print("/path/to/matrix_env/lib/python3.11/site-packages")
+        print(installation_path, "lib/python3.11/site-packages", sep="")
 
 
 if __name__ == "__main__":
