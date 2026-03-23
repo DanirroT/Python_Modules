@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 
 
-# import json, csv
-
 from typing import Optional
 from datetime import date
 from pydantic import BaseModel, ValidationError, Field, model_validator
 from enum import Enum
-
-# for this project to work, use:
-#   python -m ex0.main
-# while in root
 
 
 class ContactType(str, Enum):
@@ -33,45 +27,26 @@ class AlienContact(BaseModel):
     # max_len = 500
     is_verified: bool = Field(default=False)
 
-    """
-    def __init__(self, contact_id: str, timestamp: str, location: str,
-                 contact_type: ContactType, signal_strength: float,
-                 duration_minutes: int, witness_count: int,
-                 message_received: Optional[str] = None,
-                 is_verified: bool = False) -> None:
+    @model_validator(mode="after")
+    def validate_inputs(self) -> "AlienContact":
 
-        try:
+        if not self.contact_id.startswith("AC"):
+            raise ValueError(
+                "Contact ID must start with \"AC\" (Alien Contact)")
 
-            self.contact_id = self.str_len_check(contact_id, 5, 15)
+        if self.contact_type == "physical" and not self.is_verified:
+            raise ValueError("Physical contact reports must be verified")
 
-            self.timestamp = timestamp
+        if self.contact_type == "telepathic" and self.witness_count < 3:
+            raise ValueError(
+                "Telepathic contact requires at least 3 witnesses")
 
-            self.location = self.str_len_check(location, 3, 100)
+        if self.signal_strength > 7 and not self.message_received:
+            raise ValueError(
+                "Strong signals (> 7.0) should include received messages")
 
-            if contact_type not in ContactType():
-                raise ValueError(
-                    "Given AlienContact ContactType is not known.")
-            self.contact_type = contact_type
+        return self
 
-            self.signal_strength = self.float_val_check(signal_strength, 0, 10)
-
-            self.duration_minutes = self.int_val_check(
-                duration_minutes, 1, 1440)
-
-            self.witness_count = self.int_val_check(witness_count, 3, 100)
-
-            if message_received:
-                self.message_received = self.str_len_check(
-                    message_received, 0, 500)
-            else:
-                self.message_received = None
-
-            self.is_verified = True if is_verified else False
-
-            self.validate_inputs()
-
-        except ValueError as e:
-            print(e)"""
 
 def str_error(error_type: str, field: str, msg: str, input_raw: str,
               expected: int | None) -> None:
@@ -83,8 +58,8 @@ def str_error(error_type: str, field: str, msg: str, input_raw: str,
             print(f"'{field}' cannot be empty.")
         else:
             print(
-                f"'{field}' should be larger than or equal to {expected} char.",
-                f"Got {input_processed}")
+                f"'{field}' should be larger than or equal to {expected}",
+                f"char. Got {input_processed}")
     elif error_type == "string_too_long":
         print(
             f"'{field}' should be smaller than or equal to {expected} char.",
@@ -134,7 +109,7 @@ def float_error(error_type: str, field: str, msg: str, input_raw: float,
         else:
             print(
                 f"'{field}' should be less than or equal to {expected}.",
-                  f"Got {input_processed}")
+                f"Got {input_processed}")
     elif error_type == "greater_than_equal":
         if expected == 0:
             print(
@@ -151,8 +126,7 @@ def float_error(error_type: str, field: str, msg: str, input_raw: float,
 #        print("SpaceStation Oxygen Level be a percentage.")
 
 
-def bool_error(error_type: str, field: str, msg: str, input_raw: bool,
-               expected: bool | None) -> None:
+def bool_error(error_type: str, field: str, msg: str, input_raw: bool) -> None:
 
     input_processed = input_raw
 
@@ -173,7 +147,7 @@ def date_error(error_type: str, field: str, msg: str, input_raw: date,
         print("Unknown Error:", msg)
 
 
-def error_processing(error_details: list[dict[str, Any]]) -> None:
+def error_processing(error_details: list) -> None:
 
     # print()
     # print()
@@ -185,51 +159,45 @@ def error_processing(error_details: list[dict[str, Any]]) -> None:
     for error in error_details:
 
         # print()
-        print("corrent:", error)
+        # print("corrent:", error)
         # print()
 
         error_type = error["type"]
-        field = error["loc"][0]
+        if not len(error["loc"]):
+            field = None
+        else:
+            field = error["loc"][0]
         msg = error["msg"]
         input = error["input"]
         get_expected = error.get("ctx")
-        print("get expected:", get_expected)
+        # print("get expected:", get_expected)
+        # print()
         expected = (list(get_expected.values())[0]
                     if get_expected else get_expected)
 
-        print("unpacked:", error_type, field, msg, input, expected)
+        # print("unpacked:", error_type, field, msg, input, expected)
         # print()
-
-        if field in ["station_id", "name", "notes"]:
+        if field is None:
+            print(msg[len("Value error, "):])
+        elif field in ["contact_id", "location", "message_received"]:
             str_error(error_type, field, msg, input, expected)
-        elif field in ["crew_size"]:
+        elif field in ["duration_minutes", "witness_count"]:
             int_error(error_type, field, msg, input, expected)
-        elif field in ["power_level", "oxygen_level"]:
+        elif field in ["signal_strength", "oxygen_level"]:
             float_error(error_type, field, msg, input, expected)
-        elif field in ["last_maintenance"]:
+        elif field in ["timestamp"]:
             date_error(error_type, field, msg, input, expected)
-        elif field in ["is_operational"]:
-            bool_error(error_type, field, msg, input, expected)
+        elif field in ["is_verified"]:
+            bool_error(error_type, field, msg, input)
+        elif field in ["contact_type"]:
+            print(error_type)
+            if error_type == "bool_parsing":
+                print(f"'{field}' must a valid ContactType. Got {input}")
+            else:
+                print("Unknown Error:", msg)
+
         else:
             print("Unknown error:", error)
-
-    @model_validator
-    def validate_inputs(self) -> None:
-
-        if not self.contact_id.startswith("AC"):
-            raise ValueError(
-                "Contact ID must start with \"AC\"" "(Alien Contact)")
-
-        if self.contact_type == "physical" and not self.is_verified:
-            raise ValueError("Physical contact reports must be verified")
-
-        if self.contact_type == "telepathic" and not self.is_verified:
-            raise ValueError(
-                "Telepathic contact requires at least 3 witnesses")
-
-        if self.signal_strength > 7 and not self.message_received:
-            raise ValueError(
-                "Strong signals (> 7.0) should include received messages")
 
 
 if __name__ == "__main__":
@@ -239,8 +207,10 @@ if __name__ == "__main__":
     print("========================================")
 
     alien_contact_1 = AlienContact(
-        "AC_2024_001", str(date(2030, 5, 6)), "Area 51, Nevada",
-        ContactType.RADIO, 8.5, 45, 5, "'Greetings from Zeta Reticuli'")
+        contact_id="AC_2024_001", timestamp=date(2030, 5, 6),
+        location="Area 51, Nevada", contact_type=ContactType.RADIO,
+        signal_strength=8.5, duration_minutes=45, witness_count=5,
+        message_received="'Greetings from Zeta Reticuli'")
 
     print("Valid contact report:")
 
@@ -260,7 +230,9 @@ if __name__ == "__main__":
 
     try:
         alien_contact_2 = AlienContact(
-            "AC_2024_null", str(date.today()), "Area 52,",
-            ContactType.TELEPATHIC, 2.5, 3, 1, "'They are WHAT?'")
+            contact_id="AC_2024_null", timestamp=date.today(),
+            location="Area 52,", contact_type=ContactType.TELEPATHIC,
+            signal_strength=2.5, duration_minutes=3, witness_count=1,
+            message_received="'They are WHAT?'")
     except ValidationError as e:
         error_processing(e.errors())

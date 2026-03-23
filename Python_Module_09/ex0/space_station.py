@@ -1,19 +1,9 @@
 #!/usr/bin/env python3
 
 
-# import json, csv
-
-from typing import Optional, Any
+from typing import Optional
 from pydantic import BaseModel, ValidationError, Field
 from datetime import date
-
-# pip install pydantic pydantic-settings
-
-# www.geeksforgeeks.org/python/introduction-to-python-pydantic-library/
-
-# for this project to work, use:
-#   python -m ex0.main
-# while in root
 
 
 class SpaceStation(BaseModel):
@@ -101,13 +91,12 @@ def float_error(error_type: str, field: str, msg: str, input_raw: float,
         print("Unknown Error:", msg)
 
 
-#    if (min == 0 and max == 100
-#            and field_float < min and field_float > max):
-#        print("SpaceStation Oxygen Level be a percentage.")
+# if (min == 0 and max == 100
+#    and field_float < min and field_float > max):
+#    print("SpaceStation Oxygen Level be a percentage.")
 
 
-def bool_error(error_type: str, field: str, msg: str, input_raw: bool,
-               expected: bool | None) -> None:
+def bool_error(error_type: str, field: str, msg: str, input_raw: bool) -> None:
 
     input_processed = input_raw
 
@@ -128,7 +117,7 @@ def date_error(error_type: str, field: str, msg: str, input_raw: date,
         print("Unknown Error:", msg)
 
 
-def error_processing(error_details: list[dict[str, Any]]) -> None:
+def error_processing(error_details: list) -> None:
 
     # print()
     # print()
@@ -140,7 +129,7 @@ def error_processing(error_details: list[dict[str, Any]]) -> None:
     for error in error_details:
 
         # print()
-        print("corrent:", error)
+        # print("corrent:", error)
         # print()
 
         error_type = error["type"]
@@ -148,11 +137,11 @@ def error_processing(error_details: list[dict[str, Any]]) -> None:
         msg = error["msg"]
         input = error["input"]
         get_expected = error.get("ctx")
-        print("get expected:", get_expected)
+        # print("get expected:", get_expected)
         expected = (list(get_expected.values())[0]
                     if get_expected else get_expected)
 
-        print("unpacked:", error_type, field, msg, input, expected)
+        # print("unpacked:", error_type, field, msg, input, expected)
         # print()
 
         if field in ["station_id", "name", "notes"]:
@@ -164,7 +153,7 @@ def error_processing(error_details: list[dict[str, Any]]) -> None:
         elif field in ["last_maintenance"]:
             date_error(error_type, field, msg, input, expected)
         elif field in ["is_operational"]:
-            bool_error(error_type, field, msg, input, expected)
+            bool_error(error_type, field, msg, input)
         else:
             print("Unknown error:", error)
 
@@ -173,7 +162,7 @@ if __name__ == "__main__":
 
     print("Space Station Data Validation")
 
-    """print("========================================")
+    print("========================================")
 
     input_dict = {
         "station_id": "ISS001",
@@ -198,7 +187,7 @@ if __name__ == "__main__":
           if space_station_1.is_operational else "Offline")
 
     print()
-    """
+
     print("========================================")
 
     print("Expected validation error:")
@@ -206,7 +195,7 @@ if __name__ == "__main__":
     input_dict_wrong = {
         "station_id": "ISS_null",
         "name": "Off Brand ISS",
-        "crew_size": 1,
+        "crew_size": 25,
         "power_level": 20.5,
         "oxygen_level": 2.3,
         "last_maintenance": str(date.today()),

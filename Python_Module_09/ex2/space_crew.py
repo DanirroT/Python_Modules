@@ -1,18 +1,9 @@
 #!/usr/bin/env python3
 
 
-# from typing import Optional
-
-# import json, csv
-
-from typing import Optional
 from datetime import date
 from pydantic import BaseModel, ValidationError, Field, model_validator
 from enum import Enum
-
-# for this project to work, use:
-#   python -m ex0.main
-# while in root
 
 
 class Rank(str, Enum):
@@ -25,49 +16,68 @@ class Rank(str, Enum):
 
 class CrewMember(BaseModel):
 
-    station_id: str = Field(min_length=3, max_length=10)  # len 3-10
-    name: str = Field(min_length=1, max_length=50)  # len 1-50
-    crew_size: int = Field(ge=1, le=20)  # val 1-20
-    power_level: float = Field(ge=0, le=100)  # val 0.0-100.0 (%)
-    oxygen_level: float = Field(ge=0, le=100)  # val 0.0-100.0 (%)
-    last_maintenance: date = Field()
-    is_operational: bool = Field(default=True)
-    notes: Optional[str] = Field(default=None, max_length=200)  # max_len = 200
+    member_id: str = Field(min_length=3, max_length=10)
+    name: str = Field(min_length=2, max_length=50)
+    rank: Rank = Field()
+    age: int = Field(ge=18, le=80)
+    specialization: str = Field(min_length=3, max_length=30)
+    years_experience: int = Field(ge=0, le=50)
+    is_active: bool = Field(default=True)
 
-    member_id: str  # len 3-10
-    name: str  # val 2-50
-    rank: Rank
-    age: int  # val 18-80
-    specialization: str  # len 3-30
-    years_experience: int  # val 0-50
-    is_active: bool = True
 
-    """
-    def __init__(self, member_id: str, name: str, rank: Rank, age: int,
-                 specialization: str, years_experience: int,
-                 is_active: bool = True) -> None:
+class SpaceMission(BaseModel):
 
-        try:
+    mission_id: str = Field(min_length=5, max_length=15)
+    # len 5-15 characters
+    mission_name: str = Field(min_length=3, max_length=100)
+    # len 3-100 characters
+    destination: str = Field(min_length=3, max_length=15)
+    # len 3-50 characters
+    launch_date: date = Field()
+    duration_days: int = Field(ge=1, le=3650)  # int 1-3650 days (max 10 years)
+    crew: list[CrewMember] = Field(min_length=1, max_length=12)
+    # len min 1 max 12
+    mission_status: str = Field(min_length=3, max_length=10, default="planned")
+    budget_millions: float = Field(ge=1, le=10000)
+    # val 1.0-10000.0 million dollars
 
-            self.member_id = self.str_len_check(member_id, 3, 10)
+    @model_validator(mode="after")
+    def validate_inputs(self) -> "SpaceMission":
 
-            self.name = self.str_len_check(name, 2, 50)
+        # print()
+        # print(self.__dict__)
+        # print()
 
-            if rank not in Rank():
+        if not self.mission_id.startswith("M"):
+            raise ValueError(
+                "Mission ID must start with \"M\"")
+
+        comander = False
+        for member in self.crew:
+            if not member.is_active:
                 raise ValueError(
-                    "Given CrewMember Rank is not known.")
-            self.rank = rank
+                    "All Members of the Crew must be currently Active")
+            if (member.rank == Rank.COMANDER
+                    or member.rank == Rank.CAPTAIN):
+                comander = True
+                break
+        if not comander:
+            raise ValueError("Must have at least one Commander or Captain")
 
-            self.age = self.int_val_check(age, 18, 80)
+        if self.duration_days > 365:
+            crew_size_50 = len(self.crew) / 2
+            experienced = 0
+            for member in self.crew:
+                if member.years_experience > 5:
+                    experienced += 1
 
-            self.specialization = self.str_len_check(specialization, 3, 30)
+            if crew_size_50 > experienced:
+                raise ValueError(
+                    "Long missions (> 365 days) need 50%"
+                    " experienced crew (5+ years)")
 
-            self.years_experience = self.int_val_check(years_experience, 5, 50)
+        return self
 
-            self.is_active = True if is_active else False
-
-        except ValueError as e:
-            print(e)"""
 
 def str_error(error_type: str, field: str, msg: str, input_raw: str,
               expected: int | None) -> None:
@@ -79,12 +89,12 @@ def str_error(error_type: str, field: str, msg: str, input_raw: str,
             print(f"'{field}' cannot be empty.")
         else:
             print(
-                f"'{field}' should be larger than or equal to {expected} char.",
-                  f"Got {input_processed}")
+                f"'{field}' should be larger than or equal to {expected}",
+                f"char. Got {input_processed}")
     elif error_type == "string_too_long":
         print(
             f"'{field}' should be smaller than or equal to {expected} char.",
-                  f"Got {input_processed}")
+            f"Got {input_processed}")
     else:
         print("Unknown Error:", msg)
 
@@ -103,7 +113,7 @@ def int_error(error_type: str, field: str, msg: str, input_raw: int,
         else:
             print(
                 f"'{field}' should be less than or equal to {expected}.",
-                  f"Got {input_processed}")
+                f"Got {input_processed}")
     elif error_type == "greater_than_equal":
         if expected == 0:
             print(
@@ -111,7 +121,7 @@ def int_error(error_type: str, field: str, msg: str, input_raw: int,
         else:
             print(
                 f"'{field}' should be greater than or equal to {expected}.",
-                  f"Got {input_processed}")
+                f"Got {input_processed}")
     else:
         print("Unknown Error:", msg)
 
@@ -130,7 +140,7 @@ def float_error(error_type: str, field: str, msg: str, input_raw: float,
         else:
             print(
                 f"'{field}' should be less than or equal to {expected}.",
-                  f"Got {input_processed}")
+                f"Got {input_processed}")
     elif error_type == "greater_than_equal":
         if expected == 0:
             print(
@@ -147,8 +157,7 @@ def float_error(error_type: str, field: str, msg: str, input_raw: float,
 #        print("SpaceStation Oxygen Level be a percentage.")
 
 
-def bool_error(error_type: str, field: str, msg: str, input_raw: bool,
-               expected: bool | None) -> None:
+def bool_error(error_type: str, field: str, msg: str, input_raw: bool) -> None:
 
     input_processed = input_raw
 
@@ -169,7 +178,7 @@ def date_error(error_type: str, field: str, msg: str, input_raw: date,
         print("Unknown Error:", msg)
 
 
-def error_processing(error_details: list[dict[str, Any]]) -> None:
+def error_processing(error_details: list) -> None:
 
     # print()
     # print()
@@ -181,110 +190,45 @@ def error_processing(error_details: list[dict[str, Any]]) -> None:
     for error in error_details:
 
         # print()
-        print("corrent:", error)
+        # print("corrent:", error)
         # print()
 
         error_type = error["type"]
-        field = error["loc"][0]
+        if not len(error["loc"]):
+            field = None
+        else:
+            field = error["loc"][0]
         msg = error["msg"]
         input = error["input"]
         get_expected = error.get("ctx")
-        print("get expected:", get_expected)
+        # print("get expected:", get_expected)
+        # print()
         expected = (list(get_expected.values())[0]
                     if get_expected else get_expected)
 
-        print("unpacked:", error_type, field, msg, input, expected)
+        # print("unpacked:", error_type, field, msg, input, expected)
         # print()
-
-        if field in ["station_id", "name", "notes"]:
+        if field is None:
+            print(msg[len("Value error, "):])
+        elif field in ["contact_id", "location", "message_received"]:
             str_error(error_type, field, msg, input, expected)
-        elif field in ["crew_size"]:
+        elif field in ["duration_minutes", "witness_count"]:
             int_error(error_type, field, msg, input, expected)
-        elif field in ["power_level", "oxygen_level"]:
+        elif field in ["signal_strength", "oxygen_level"]:
             float_error(error_type, field, msg, input, expected)
-        elif field in ["last_maintenance"]:
+        elif field in ["timestamp"]:
             date_error(error_type, field, msg, input, expected)
-        elif field in ["is_operational"]:
-            bool_error(error_type, field, msg, input, expected)
+        elif field in ["is_verified"]:
+            bool_error(error_type, field, msg, input)
+        elif field in ["contact_type"]:
+            print(error_type)
+            if error_type == "bool_parsing":
+                print(f"'{field}' must a valid ContactType. Got {input}")
+            else:
+                print("Unknown Error:", msg)
+
         else:
             print("Unknown error:", error)
-
-
-class SpaceMission():
-    mission_id: str  # len 5-15 characters
-    mission_name: str  # len 3-100 characters
-    destination: str  # len 3-50 characters
-    launch_date: str
-    duration_days: int  # int 1-3650 days (max 10 years)
-    crew: list[CrewMember]  # len min 1 max 12
-    mission_status: str = "planned"
-    budget_millions: float  # val 1.0-10000.0 million dollars
-
-    def __init__(self, mission_id: str, mission_name: str, destination: str,
-                 launch_date: str, duration_days: int,
-                 crew: list[CrewMember], budget_millions: float,
-                 mission_status: str = "planned") -> None:
-
-        try:
-
-            self.mission_id = self.str_len_check(mission_id, 5, 15)
-
-            self.mission_name = self.str_len_check(mission_name, 3, 100)
-
-            self.destination = self.str_len_check(destination, 3, 50)
-
-            self.launch_date = launch_date
-
-            self.duration_days = self.int_val_check(duration_days, 1, 3650)
-
-            if len(crew) < 1:
-                raise ValueError(
-                    "SpaceMission crew must have at least one member.")
-            if len(crew) > 12:
-                raise ValueError(
-                    "SpaceMission crew has too many people (max=12).")
-            self.crew = crew
-
-            self.mission_status = self.str_len_check(mission_status, 1, 50)
-
-            self.budget_millions = self.float_val_check(
-                budget_millions, 1, 10000)
-
-        except ValueError as e:
-            print(e)
-
-    @model_validator
-    def validate_inputs(self) -> None:
-
-        if not self.mission_id.startswith("M"):
-            raise ValueError(
-                "Mission ID must start with \"M\"")
-
-        comander = False
-        for member in self.crew:
-            if (member.is_active == "captain"
-                    and member.is_active == "commander"):
-                comander = True
-                break
-        if not comander:
-            raise ValueError("Must have at least one Commander or Captain")
-
-        if self.duration_days > 365:
-            crew_size_50 = len(self.crew) / 2
-            experienced = 0
-            for member in self.crew:
-                if member.years_experience:
-                    experienced += 1
-
-            if crew_size_50 < experienced:
-                raise ValueError(
-                    "Long missions (> 365 days) need 50%"
-                    "experienced crew (5+ years)")
-
-        for member in self.crew:
-            if not member.is_active:
-                raise ValueError(
-                    "All crew members must be active")
 
 
 if __name__ == "__main__":
@@ -294,17 +238,22 @@ if __name__ == "__main__":
     print("========================================")
 
     sara = CrewMember(
-        "E1984", "Sarah Connor", Rank.COMANDER, 47, "Mission Command", 9)
+        member_id="E1984", name="Sarah Connor", rank=Rank.COMANDER, age=47,
+        specialization="Mission Command", years_experience=9)
     john = CrewMember(
-        "E1994", "John Smith", Rank.LIEUTENANT, 44, "Navigation", 6)
+        member_id="E1994", name="John Smith", rank=Rank.LIEUTENANT, age=44,
+        specialization="Navigation", years_experience=6)
     alice = CrewMember(
-        "E2003", "Alice Johnson", Rank.OFFICER, 28, "Engineering", 3)
+        member_id="E2003", name="Alice Johnson", rank=Rank.OFFICER, age=28,
+        specialization="Engineering", years_experience=3)
     frank = CrewMember(
-        "M2025", "Frank Lee", Rank.CADET, 21, "Smuggler", 0)
+        member_id="M2025", name="Frank Lee", rank=Rank.CADET, age=21,
+        specialization="Smuggler", years_experience=0)
 
     space_mission_1 = SpaceMission(
-        "M2024_MARS", "Mars Colony Establishment", "Mars",
-        str(date(2030, 5, 6)), 900, [sara, john, alice], 2500)
+        mission_id="M2024_MARS", mission_name="Mars Colony Establishment",
+        destination="Mars", launch_date=date(2030, 5, 6), duration_days=900,
+        crew=[sara, john, alice], budget_millions=2500)
 
     print("Valid mission created:")
 
@@ -326,7 +275,8 @@ if __name__ == "__main__":
 
     try:
         space_station_2 = SpaceMission(
-            "M2024_URANUS", "Uranus Exploration", "Uranus",
-            str(date.today()), 2000, [alice, frank], 70 - 1)
+            mission_id="M2024_URANUS", mission_name="Uranus Exploration",
+            destination="Uranus", launch_date=date.today(), duration_days=2000,
+            crew=[alice, frank], budget_millions=70 - 1)
     except ValidationError as e:
         error_processing(e.errors())
