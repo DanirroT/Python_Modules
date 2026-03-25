@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from alchemy.transmutation import lead_to_gold, stone_to_gem, philosophers_stone, elixir_of_life
+from alchemy.transmutation import (lead_to_gold, stone_to_gem,
+                                   philosophers_stone, elixir_of_life)
 import alchemy.transmutation
 
 
@@ -41,7 +42,7 @@ def ft_sacred_scroll() -> None:
     print()
 
     print("Testing Package Access:")
-    
+
     try:
         result = alchemy.transmutation.lead_to_gold()
     except AttributeError:

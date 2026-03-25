@@ -33,8 +33,10 @@ if __name__ == "__main__":
 
     print("Simulating aggressive turn...")
 
-    print(f"Hand: [{", ".join([f"{card.name} ({card.cost})"
-                               for card in engine.hand])}]")
+    hand_listing = ', '.join([f'{card.name} ({card.cost})'
+                              for card in engine.hand])
+
+    print(f"Hand: [{hand_listing}]")
 
     print()
 

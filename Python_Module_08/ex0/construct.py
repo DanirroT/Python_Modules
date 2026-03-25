@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, os
+import os
 # from _ import site modules
 
 
@@ -51,7 +51,7 @@ def construct():
         main_message = "Safe to install packages without affecting the global system."
 
     print()
-    
+
     print("MATRIX STATUS:", matrix_status)
 
     print()

@@ -60,7 +60,9 @@ class TournamentPlatform():
         print("Tournament Leaderboard:")
 
         sort = [card for card in
-                sorted(self.registered_cards, key=(lambda card: card.rating), reverse=True)]
+                sorted(self.registered_cards,
+                       key=(lambda card: card.rating),
+                       reverse=True)]
 
         for i, card in enumerate(sort, start=1):
             print(f"{i}. {card.name} - Rating: "

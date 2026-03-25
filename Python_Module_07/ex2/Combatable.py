@@ -7,15 +7,14 @@ from ex0.Card import Card
 
 class Combatable(ABC):
 
-
     power: int
     defense: int
     health: int
     combat_type: str
 
     @abstractmethod
-    def __init__(self, power: int, defense: int, health: int, combat_type: str, **kwargs
-                 ) -> None:
+    def __init__(self, power: int, defense: int, health: int, combat_type: str,
+                 **kwargs) -> None:
         super().__init__(**kwargs)
         try:
             power_int = int(power)

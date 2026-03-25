@@ -42,4 +42,4 @@ if __name__ == "__main__":
 
     print()
 
-    print("Abstract pattern successfully demonstrated!")
+    print("Multiple interface implementation successful!")

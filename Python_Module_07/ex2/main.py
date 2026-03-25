@@ -39,7 +39,8 @@ if __name__ == "__main__":
 
     print("Magic phase:")
 
-    print("Spell cast:", arcane_warrior.cast_spell("Fireball", ['Enemy1', 'Enemy2']))
+    print("Spell cast:",
+          arcane_warrior.cast_spell("Fireball", ['Enemy1', 'Enemy2']))
 
     print("Mana channel:", arcane_warrior.channel_mana(3))
 

@@ -24,8 +24,9 @@ class GameEngine():
     def set_hand(self, hand: list[Card]) -> None:
         self.hand = hand.copy()
 
-    def configure_engine(self, factory: CardFactory, strategy: GameStrategy
-                         ) -> None:
+    def configure_engine(self, factory: type[CardFactory],
+                         strategy: type[GameStrategy]) -> None:
+
         self.factory = factory()
         print("Factory:", self.factory.__class__.__name__)
         self.strategy = strategy()

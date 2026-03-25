@@ -41,8 +41,9 @@ class TournamentCard(Card, Combatable, Rankable):
     def get_tournament_stats(self) -> dict:
         print(f"{self.name} (ID: {self.rank_id})")
 
-        print(f"- Interfaces: {[cls.__name__
-                                for cls in self.__class__.__bases__]})")
+        interfacing = [cls.__name__ for cls in self.__class__.__bases__]
+
+        print(f"- Interfaces: {interfacing})")
         print(f"- Rating: {self.rating}")
         print(f"- Record: {self.wins}-{self.losses}")
 

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
-def create_fire() -> None:
+def create_fire() -> str:
     return "Fire element created"
 
 
-def create_water() -> None:
+def create_water() -> str:
     return "Water element created"
 
 
-def create_earth() -> None:
+def create_earth() -> str:
     return "Earth element created"
 
 
-def create_air() -> None:
+def create_air() -> str:
     return "Air element created"
