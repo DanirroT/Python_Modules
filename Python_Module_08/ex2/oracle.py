@@ -19,19 +19,31 @@ def oracle() -> None:
 
     print("ORACLE STATUS: Reading the Matrix...")
 
-    load_dotenv()
+    env_state = load_dotenv()
 
     print()
 
-    print("Configuration loaded:")
-
-    env_dict = {
-        "MATRIX_MODE": os.getenv("MATRIX_MODE"),
-        "DATABASE_URL": os.getenv("DATABASE_URL"),
-        "API_KEY": os.getenv("API_KEY"),
-        "LOG_LEVEL": os.getenv("LOG_LEVEL"),
-        "ZION_ENDPOINT": os.getenv("ZION_ENDPOINT"),
-    }
+    if env_state:
+        print("Configuration loaded:")
+    else:
+        print("Configuration not loaded.")
+        print("Likely missing '.env' file in directory")
+        print("copy '.env.example' and set the variables to your liking")
+        print("$> cp .env.example .env")
+        return
+    try:
+        env_dict = {
+            "MATRIX_MODE": os.getenv("MATRIX_MODE"),
+            "DATABASE_URL": os.getenv("DATABASE_URL"),
+            "API_KEY": os.getenv("API_KEY"),
+            "LOG_LEVEL": os.getenv("LOG_LEVEL"),
+            "ZION_ENDPOINT": os.getenv("ZION_ENDPOINT"),
+        }
+    except ValueError as e:
+        print(e)
+        print("Likely not all variables are accounted for. "
+              "Please check the '.ven' file")
+        return
 
     # print()
     # print(env_dict)
@@ -39,27 +51,33 @@ def oracle() -> None:
     # print(dict(env_dict))
     # print()
 
-    for key, value in env_dict.items():
-        # if value is None:
-        #     raise ValueError(f"{key} is missing from configuration")
-        # env_dict[key] = value.split("#")[0].strip()
-        if not env_dict[key]:
-            raise ValueError(f"{key}={value} is not formatted correctly.\n"
-                             "\tCorrect formatig is: VALUE_NAME=<value>")
+    try:
+        for key, value in env_dict.items():
+            # if value is None:
+            #     raise ValueError(f"{key} is missing from configuration")
+            # env_dict[key] = value.split("#")[0].strip()
+            if not env_dict[key]:
+                raise ValueError(f"{key}={value} is not formatted correctly.\n"
+                                 "\tCorrect formatig is: VALUE_NAME=<value>")
 
-    if (env_dict["MATRIX_MODE"]
-            not in {"development", "production"}):
-        raise ValueError(
-            "MATRIX_MODE must be \"development\" or \"production\"")
+        if (env_dict["MATRIX_MODE"]
+                not in {"development", "production"}):
+            raise ValueError(
+                "MATRIX_MODE must be \"development\" or \"production\""
+            )
 
-    if not isinstance(env_dict["DATABASE_URL"], str):
-        raise ValueError("DATABASE_URL must be a string")
-    if not isinstance(env_dict["API_KEY"], str):
-        raise ValueError("API_KEY must be a string")
-    if not isinstance(env_dict["LOG_LEVEL"], str):
-        raise ValueError("LOG_LEVEL must be a string")
-    if not isinstance(env_dict["ZION_ENDPOINT"], str):
-        raise ValueError("ZION_ENDPOINT must be a string")
+        if not isinstance(env_dict["DATABASE_URL"], str):
+            raise ValueError("DATABASE_URL must be a string")
+        if not isinstance(env_dict["API_KEY"], str):
+            raise ValueError("API_KEY must be a string")
+        if not isinstance(env_dict["LOG_LEVEL"], str):
+            raise ValueError("LOG_LEVEL must be a string")
+        if not isinstance(env_dict["ZION_ENDPOINT"], str):
+            raise ValueError("ZION_ENDPOINT must be a string")
+
+    except ValueError as e:
+        print(e)
+        return
 
     print("Mode:", env_dict["MATRIX_MODE"])
     print("Database:",

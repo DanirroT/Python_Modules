@@ -48,7 +48,8 @@ def construct():
         viritual_environment = environment["VIRTUAL_ENV_PROMPT"][2:-2]
         # print("2", viritual_environment)
         main_status_message = "SUCCESS: You're in an isolated environment!"
-        main_message = "Safe to install packages without affecting the global system."
+        main_message = ("Safe to install packages without "
+                        "affecting the global system.")
 
     print()
 
