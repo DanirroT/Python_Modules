@@ -126,7 +126,7 @@ class SensorStream(DataStream):
 
         self.type_str = "Sensor"
         self.name_str = "readings processed"
-        self.error_msg = "ritical sensor alerts"
+        self.error_msg = "critical sensor alerts"
 
     def process_batch(self, data_batch: List[SensorType]) -> str:
 
@@ -538,6 +538,7 @@ def data_stream() -> None:
 
     print(Sensor.process_batch([
         SensorType("temp", 22.5),  # °C
+        # SensorType("temp", 30),  # °C
         SensorType("humidity", 65),  # %
         SensorType("pressure", 1013)  # hPa
     ]))
@@ -618,11 +619,11 @@ def data_stream() -> None:
         TransactionType("buy", 75),
         EventType("git status"),
         TransactionType("sell", 1500),
+        # OtherType("high-priority"),
         SensorType("humidity", 95),
-        EventType("logout")
+        EventType("error")
     ]))
 
-    #     OtherType("high-priority"),
 
     print()
 
