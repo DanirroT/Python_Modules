@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
 
-import functools
-from typing import Any
-from operator import add, mul
-import itertools
+import random
+from typing import Callable
 
-def spell_combiner(spell1: callable, spell2: callable) -> callable:
+
+def spell_combiner(spell1: Callable, spell2: Callable) -> Callable:
     def combined(**kwargs) -> str:
         return ("Combined spell result: "
-                + spell1(**kwargs)
+                + spell1(**kwargs) + " : "
                 + spell2(**kwargs))
     return combined
 
 
-def power_amplifier(base_spell: callable, multiplier: int) -> callable:
+def power_amplifier(base_spell: Callable, multiplier: int) -> Callable:
     def amplified(**kwargs) -> int:
         return base_spell(**kwargs) * multiplier
     return amplified
 
 
-def conditional_caster(condition: callable, spell: callable) -> callable:
+def conditional_caster(condition: Callable, spell: Callable) -> Callable:
     def conditioned(**kwargs) -> str:
         if condition(**kwargs):
             return (spell(**kwargs))
@@ -28,47 +27,122 @@ def conditional_caster(condition: callable, spell: callable) -> callable:
     return conditioned
 
 
-def spell_sequence(spells: list[callable]) -> callable:
+def spell_sequence(spells: list[Callable]) -> Callable:
     def sequenceed(**kwargs) -> list:
         return [spell(**kwargs) for spell in spells]
     return sequenceed
 
 
-def mold_earth(directions: str):
-def shape_water(directions: str):
-def fireball(targets: str):
-def firebolt(targets: str):
-def lightning_bolt(targets: str):
-def shatter(targets: str):
-def magic_missile(targets: str):
-def misty_step(directions: str):
-def wish(directions: str):
+# Elemental Magic
 
-def check_spellslot(spellslot: int, spell_lvl: int, **kwargs):
-{
 
-}
+def mold_earth(directions: str) -> str:
+    return ("You speak an encantation of the Earth, Creating: " +
+            directions)
 
+
+def shape_water(directions: str) -> str:
+    return ("You speak an encantation of the Depths, Creating: " +
+            directions)
+
+
+def control_flame(directions: str) -> str:
+    return ("You speak an encantation of the Hells, Creating: " +
+            directions)
+
+
+def gust(directions: str) -> str:
+    return ("You speak an encantation of the Storm, Creating: " +
+            directions)
+
+
+# Offensive Magic
+
+
+def fireball(targets: list[str]) -> str:
+    return ("You speak an encantation of the Hells, raining Fire upon: " +
+            ", ".join(targets))
+
+
+def firebolt(targets: list[str]) -> str:
+    return ("You speak an encantation of the Hells, blasting flames on: " +
+            ", ".join(targets))
+
+
+def lightning_bolt(targets: list[str]) -> str:
+    return ("You speak an encantation of the Storm, " +
+            "striking Lightning upon: " +
+            ", ".join(targets))
+
+
+def shatter(targets: list[str]) -> str:
+    return ("You speak an encantation of the Storm, " +
+            "conjuring Thunder upon: " +
+            ", ".join(targets))
+
+
+def magic_missile(targets: list[str], **kwargs) -> int:
+    return (sum(random.choice([1, 2, 3, 4]) + 1 for target in targets))
+
+
+# Other Magics
+
+
+def misty_step(directions: str, **kwargs) -> str:
+    return ("You speak an encantation of the Fey, " +
+            "transporting youtrself to: " +
+            directions)
+
+
+def wish(directions: str) -> str:
+    return ("You speak The AllWord. nothing stands " +
+            "in your way as you state: " +
+            directions)
+
+
+# Magical Resorses
+
+
+def check_spellslot(spellslot: int, spell_lvl: int, **kwargs) -> bool:
+    if spellslot < spell_lvl:
+        return False
+    return True
 
 
 def higher_magic() -> None:
 
-    test_values = [19, 10, 18]
+    # test_values = [19, 10, 18]
     test_targets = ['Dragon', 'Goblin', 'Wizard', 'Knight']
 
     combined = spell_combiner(mold_earth, shape_water)
+
+    print(combined(directions="a mud statue"))
 
     mult = 3
 
     amplefied = power_amplifier(magic_missile, mult)
 
+    print("regular cast sample:",
+          magic_missile(targets=[random.choice(test_targets),
+                                 random.choice(test_targets)]))
 
-    conditional = conditional_caster(condition, wish)
+    print("amplefied cast sample:",
+          amplefied(targets=[random.choice(test_targets),
+                             random.choice(test_targets)]))
 
-    conditional = conditional_caster(condition, firebolt)
+    conditional_bad = conditional_caster(check_spellslot, wish)
 
+    print(conditional_bad(spellslot=3, spell_lvl=9,
+                          directions="All the Power in the WORLD"))
 
-    sequence = spell_sequence(spells)
+    conditional_good = conditional_caster(check_spellslot, misty_step)
+
+    print(conditional_good(spellslot=0, spell_lvl=0, directions="30 ft North"))
+
+    sequence = spell_sequence([magic_missile, magic_missile, magic_missile])
+
+    print(sequence(targets=[random.choice(test_targets),
+                            random.choice(test_targets)]))
 
 
 if __name__ == "__main__":

@@ -26,15 +26,21 @@ def mage_stats(mages: list[dict]) -> dict:
 
 def lambda_spells() -> None:
 
-    artifacts = [{'name': 'Light Prism', 'power': 50, 'type': 'accessory'},
+    artifacts = [
+        {'name': 'Light Prism', 'power': 50, 'type': 'accessory'},
         {'name': 'Water Chalice', 'power': 100, 'type': 'relic'},
         {'name': 'Earth Shield', 'power': 40, 'type': 'armor'},
-        {'name': 'Shadow Blade', 'power': 3, 'type': 'weapon'}]
-    mages = [{'name': 'Ember', 'power': 94, 'element': 'earth'},
+        {'name': 'Shadow Blade', 'power': 3, 'type': 'weapon'}
+    ]
+
+    mages = [
+        {'name': 'Ember', 'power': 94, 'element': 'earth'},
         {'name': 'Jordan', 'power': 72, 'element': 'wind'},
         {'name': 'Luna', 'power': 84, 'element': 'ice'},
         {'name': 'Morgan', 'power': 100, 'element': 'water'},
-        {'name': 'Sage', 'power': 76, 'element': 'earth'}]
+        {'name': 'Sage', 'power': 76, 'element': 'earth'}
+    ]
+    
     spells = ['meteor', 'darkness', 'tsunami', 'flash']
 
     print()
