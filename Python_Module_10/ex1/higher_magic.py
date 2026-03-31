@@ -28,31 +28,31 @@ def conditional_caster(condition: Callable, spell: Callable) -> Callable:
 
 
 def spell_sequence(spells: list[Callable]) -> Callable:
-    def sequenceed(**kwargs) -> list:
+    def sequenced(**kwargs) -> list[Callable]:
         return [spell(**kwargs) for spell in spells]
-    return sequenceed
+    return sequenced
 
 
 # Elemental Magic
 
 
 def mold_earth(directions: str) -> str:
-    return ("You speak an encantation of the Earth, Creating: " +
+    return ("You speak an incantation of the Earth, Creating: " +
             directions)
 
 
 def shape_water(directions: str) -> str:
-    return ("You speak an encantation of the Depths, Creating: " +
+    return ("You speak an incantation of the Depths, Creating: " +
             directions)
 
 
 def control_flame(directions: str) -> str:
-    return ("You speak an encantation of the Hells, Creating: " +
+    return ("You speak an incantation of the Hells, Creating: " +
             directions)
 
 
 def gust(directions: str) -> str:
-    return ("You speak an encantation of the Storm, Creating: " +
+    return ("You speak an incantation of the Storm, Creating: " +
             directions)
 
 
@@ -60,23 +60,23 @@ def gust(directions: str) -> str:
 
 
 def fireball(targets: list[str]) -> str:
-    return ("You speak an encantation of the Hells, raining Fire upon: " +
+    return ("You speak an incantation of the Hells, raining Fire upon: " +
             ", ".join(targets))
 
 
 def firebolt(targets: list[str]) -> str:
-    return ("You speak an encantation of the Hells, blasting flames on: " +
+    return ("You speak an incantation of the Hells, blasting flames on: " +
             ", ".join(targets))
 
 
 def lightning_bolt(targets: list[str]) -> str:
-    return ("You speak an encantation of the Storm, " +
+    return ("You speak an incantation of the Storm, " +
             "striking Lightning upon: " +
             ", ".join(targets))
 
 
 def shatter(targets: list[str]) -> str:
-    return ("You speak an encantation of the Storm, " +
+    return ("You speak an incantation of the Storm, " +
             "conjuring Thunder upon: " +
             ", ".join(targets))
 
@@ -89,8 +89,8 @@ def magic_missile(targets: list[str], **kwargs) -> int:
 
 
 def misty_step(directions: str, **kwargs) -> str:
-    return ("You speak an encantation of the Fey, " +
-            "transporting youtrself to: " +
+    return ("You speak an incantation of the Fey, " +
+            "transporting yourself to: " +
             directions)
 
 
@@ -100,7 +100,7 @@ def wish(directions: str) -> str:
             directions)
 
 
-# Magical Resorses
+# Magical Resources
 
 
 def check_spellslot(spellslot: int, spell_lvl: int, **kwargs) -> bool:
@@ -120,14 +120,14 @@ def higher_magic() -> None:
 
     mult = 3
 
-    amplefied = power_amplifier(magic_missile, mult)
+    amplified = power_amplifier(magic_missile, mult)
 
     print("regular cast sample:",
           magic_missile(targets=[random.choice(test_targets),
                                  random.choice(test_targets)]))
 
-    print("amplefied cast sample:",
-          amplefied(targets=[random.choice(test_targets),
+    print("amplified cast sample:",
+          amplified(targets=[random.choice(test_targets),
                              random.choice(test_targets)]))
 
     conditional_bad = conditional_caster(check_spellslot, wish)

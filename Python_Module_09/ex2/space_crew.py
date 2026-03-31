@@ -11,7 +11,7 @@ class Rank(str, Enum):
     OFFICER = "officer"
     LIEUTENANT = "lieutenant"
     CAPTAIN = "captain"
-    COMANDER = "commander"
+    COMMANDER = "commander"
 
 
 class CrewMember(BaseModel):
@@ -52,16 +52,16 @@ class SpaceMission(BaseModel):
             raise ValueError(
                 "Mission ID must start with \"M\"")
 
-        comander = False
+        commander = False
         for member in self.crew:
             if not member.is_active:
                 raise ValueError(
                     "All Members of the Crew must be currently Active")
-            if (member.rank == Rank.COMANDER
+            if (member.rank == Rank.COMMANDER
                     or member.rank == Rank.CAPTAIN):
-                comander = True
+                commander = True
                 break
-        if not comander:
+        if not commander:
             raise ValueError("Must have at least one Commander or Captain")
 
         if self.duration_days > 365:
@@ -105,7 +105,7 @@ def int_error(error_type: str, field: str, msg: str, input_raw: int,
     input_processed = input_raw
 
     if error_type == "int_parsing":
-        print(f"'{field}' must an intager. Got {input_processed}")
+        print(f"'{field}' must an integer. Got {input_processed}")
     elif error_type == "less_than_equal":
         if expected == 0:
             print(
@@ -132,7 +132,7 @@ def float_error(error_type: str, field: str, msg: str, input_raw: float,
     input_processed = input_raw
 
     if error_type == "float_parsing":
-        print(f"'{field}' must an intager. Got {input_processed}")
+        print(f"'{field}' must an integer. Got {input_processed}")
     elif error_type == "less_than_equal":
         if expected == 0:
             print(
@@ -190,7 +190,7 @@ def error_processing(error_details: list) -> None:
     for error in error_details:
 
         # print()
-        # print("corrent:", error)
+        # print("current:", error)
         # print()
 
         error_type = error["type"]
@@ -238,7 +238,7 @@ if __name__ == "__main__":
     print("========================================")
 
     sara = CrewMember(
-        member_id="E1984", name="Sarah Connor", rank=Rank.COMANDER, age=47,
+        member_id="E1984", name="Sarah Connor", rank=Rank.COMMANDER, age=47,
         specialization="Mission Command", years_experience=9)
     john = CrewMember(
         member_id="E1994", name="John Smith", rank=Rank.LIEUTENANT, age=44,

@@ -64,7 +64,7 @@ class MageGuild:
 
 
 def fireball(targets: list[str]) -> str:
-    return ("You speak an encantation of the Hells, raining Fire upon: " +
+    return ("You speak an incantation of the Hells, raining Fire upon: " +
             ", ".join(targets))
 
 
@@ -91,21 +91,21 @@ def decorator_mastery() -> None:
 
     print()
 
-    mageguild = MageGuild()
+    mage_guild = MageGuild()
 
     print("Testing validate mage name...")
 
-    print(mageguild.validate_mage_name("Karsus of Netheril"))
+    print(mage_guild.validate_mage_name("Karsus of Netheril"))
 
-    print(mageguild.validate_mage_name("Mistra, the 3rd"))
+    print(mage_guild.validate_mage_name("Mistra, the 3rd"))
 
     print()
 
     print("Testing cast spell...")
 
-    print(mageguild.cast_spell("Lightning", 15))
+    print(mage_guild.cast_spell("Lightning", 15))
 
-    print(mageguild.cast_spell("Campfire", 8))
+    print(mage_guild.cast_spell("Campfire", 8))
 
 
 if __name__ == "__main__":

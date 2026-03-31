@@ -20,13 +20,14 @@ def spell_reducer(spells: list[int], operation: str) -> int:
         return None
 
 
-def partial_enchanter(base_enchantment: Callable) -> dict[str, Callable]:
+def partial_enchanter(base_enchantment: Callable[[int, str, str], str]
+                      ) -> dict[str, Callable[[str], str]]:
     return {"fire_enchant": functools.partial(
-        base_enchantment, element="Fire", power=50),
+        base_enchantment, 50, "Fire"),
             "ice_enchant": functools.partial(
-                base_enchantment, element="Ice", power=50),
+                base_enchantment, 50, "Ice"),
             "lightning_enchant": functools.partial(
-                base_enchantment, element="Lightning", power=50)
+                base_enchantment, 50, "Lightning")
     }
 
 
@@ -40,7 +41,7 @@ def memoized_fibonacci(n: int) -> int:
 def spell_dispatcher() -> Callable:
 
     @functools.singledispatch
-    def process(value):
+    def process(value) -> str:
         return "Unknown Spell Type"
 
     @process.register
@@ -64,17 +65,17 @@ def enchantment(power: int, element: str, target: str) -> str:
 
 
 def firebolt(damage: int) -> str:
-    return ("You speak an encantation of the Hells, doing " +
+    return ("You speak an incantation of the Hells, doing " +
             f"{damage} damage on the target")
 
 
 def magic_missile(targets: list[str]) -> int:
-    return (sum(random.choice([1, 2, 3, 4]) + 1 for target in targets))
+    return (sum(random.choice([1, 2, 3, 4]) + 1 for _ in targets))
 
 
 def misty_step(directions: str) -> str:
-    return ("You speak an encantation of the Fey, " +
-            "transporting youtrself to: " +
+    return ("You speak an incantation of the Fey, " +
+            "transporting yourself to: " +
             directions)
 
 
@@ -93,7 +94,7 @@ def functools_artifacts() -> None:
 
     print("Testing partial enchanter...")
 
-    elemental_enchantments = partial_enchanter(enchantment)
+    elemental_enchantments: dict[str, Callable] = partial_enchanter(enchantment)
 
     print("Conjure Fire:",
           elemental_enchantments["fire_enchant"](target="Sword"))
@@ -112,7 +113,7 @@ def functools_artifacts() -> None:
 
     print("Testing spell dispatcher...")
 
-    dispatch = spell_dispatcher()
+    dispatch: Callable = spell_dispatcher()
 
     print("int:", dispatch(3))
     print("str:", dispatch("30 ft up"))

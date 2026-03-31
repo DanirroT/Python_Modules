@@ -1,47 +1,49 @@
 #!/usr/bin/env python3
 
 
-def artifact_sorter(artifacts: list[dict]) -> list[dict]:
+def artifact_sorter(artifacts: list[dict[str, str | int]]
+                    ) -> list[dict[str, str | int]]:
     return sorted(artifacts, key=lambda x: x["power"], reverse=True)
 
 
-def power_filter(mages: list[dict], min_power: int) -> list[dict]:
-    return list(filter(lambda x: x["power"] >= min_power, mages))
+def power_filter(mages: list[dict[str, str | int]], min_power: int
+                 ) -> list[dict[str, str | int]]:
+    return list(filter(lambda x: int(x["power"]) >= min_power, mages))
 
 
 def spell_transformer(spells: list[str]) -> list[str]:
     return list(map(lambda x: "* " + x + " *", spells))
 
 
-def mage_stats(mages: list[dict]) -> dict:
-    mages_power = list(map(lambda x: x['power'], mages))
-    max_ = max(mages_power)
-    min_ = min(mages_power)
-    sum_ = sum(mages_power)
-    len_ = len(mages_power)
-    avg_ = round(sum_ / len_, 2)
+def mage_stats(mages: list[dict[str, str | int]]) -> dict[str, int | float]:
+    mages_power: list[int] = list(map(lambda x: x['power'], mages))
+    max_: int = max(mages_power)
+    min_: int = min(mages_power)
+    sum_: int = sum(mages_power)
+    len_: int = len(mages_power)
+    avg_: float = round(sum_ / len_, 2)
 
     return {"max_power": max_, "min_power": min_, "avg_power": avg_}
 
 
 def lambda_spells() -> None:
 
-    artifacts = [
+    artifacts: list[dict[str, str | int]] = [
         {'name': 'Light Prism', 'power': 50, 'type': 'accessory'},
         {'name': 'Water Chalice', 'power': 100, 'type': 'relic'},
         {'name': 'Earth Shield', 'power': 40, 'type': 'armor'},
         {'name': 'Shadow Blade', 'power': 3, 'type': 'weapon'}
     ]
 
-    mages = [
+    mages: list[dict[str, str | int]] = [
         {'name': 'Ember', 'power': 94, 'element': 'earth'},
         {'name': 'Jordan', 'power': 72, 'element': 'wind'},
         {'name': 'Luna', 'power': 84, 'element': 'ice'},
         {'name': 'Morgan', 'power': 100, 'element': 'water'},
         {'name': 'Sage', 'power': 76, 'element': 'earth'}
     ]
-    
-    spells = ['meteor', 'darkness', 'tsunami', 'flash']
+
+    spells: list[str] = ['meteor', 'darkness', 'tsunami', 'flash']
 
     print()
 

@@ -17,9 +17,9 @@ def mage_counter() -> Callable:
 def spell_accumulator(initial_power: int) -> Callable:
     power = initial_power
 
-    def add_return(aditional_power: int) -> int:
+    def add_return(additional_power: int) -> int:
         nonlocal power
-        power += aditional_power
+        power += additional_power
         return power
     return add_return
 
@@ -92,9 +92,9 @@ def scope_mysteries() -> None:
     vault["store"](mk_2, mv_2)
     vault["store"](mk_3, mv_3)
 
-    print("Retriving memory:", mk_1, vault["recall"](mk_1))
-    print("Retriving memory:", mk_2, vault["recall"](mk_2))
-    print("Retriving memory:", "mk_3", vault["recall"]("mk_3"))
+    print("Retrieving memory:", mk_1, vault["recall"](mk_1))
+    print("Retrieving memory:", mk_2, vault["recall"](mk_2))
+    print("Retrieving memory:", "mk_3", vault["recall"]("mk_3"))
 
 
 if __name__ == "__main__":

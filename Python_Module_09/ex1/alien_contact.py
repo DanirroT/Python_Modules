@@ -74,7 +74,7 @@ def int_error(error_type: str, field: str, msg: str, input_raw: int,
     input_processed = input_raw
 
     if error_type == "int_parsing":
-        print(f"'{field}' must an intager. Got {input_processed}")
+        print(f"'{field}' must an integer. Got {input_processed}")
     elif error_type == "less_than_equal":
         if expected == 0:
             print(
@@ -101,7 +101,7 @@ def float_error(error_type: str, field: str, msg: str, input_raw: float,
     input_processed = input_raw
 
     if error_type == "float_parsing":
-        print(f"'{field}' must an intager. Got {input_processed}")
+        print(f"'{field}' must an integer. Got {input_processed}")
     elif error_type == "less_than_equal":
         if expected == 0:
             print(
@@ -159,7 +159,7 @@ def error_processing(error_details: list) -> None:
     for error in error_details:
 
         # print()
-        # print("corrent:", error)
+        # print("current:", error)
         # print()
 
         error_type = error["type"]

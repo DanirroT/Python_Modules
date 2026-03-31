@@ -624,7 +624,6 @@ def data_stream() -> None:
         EventType("error")
     ]))
 
-
     print()
 
     print("All streams processed successfully. Nexus throughput optimal.")

@@ -18,7 +18,7 @@ class Rank(str, Enum):
     OFFICER = "officer"
     LIEUTENANT = "lieutenant"
     CAPTAIN = "captain"
-    COMANDER = "commander"
+    COMMANDER = "commander"
 
 
 class CrewMember():
@@ -208,13 +208,13 @@ class SpaceMission():
             raise ValueError(
                 "Mission ID must start with \"M\"")
 
-        comander = False
+        commander = False
         for member in self.crew:
             if (member.is_active == "captain"
                     and member.is_active == "commander"):
-                comander = True
+                commander = True
                 break
-        if not comander:
+        if not commander:
             raise ValueError("Must have at least one Commander or Captain")
 
         if self.duration_days > 365:
@@ -242,7 +242,7 @@ if __name__ == "__main__":
     print("========================================")
 
     sara = CrewMember(
-        "E1984", "Sarah Connor", Rank.COMANDER, 47, "Mission Command", 9)
+        "E1984", "Sarah Connor", Rank.COMMANDER, 47, "Mission Command", 9)
     john = CrewMember(
         "E1994", "John Smith", Rank.LIEUTENANT, 44, "Navigation", 6)
     alice = CrewMember(
